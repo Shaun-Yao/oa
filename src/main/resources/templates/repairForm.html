@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>repair form</title>
+</head>
+<body>
+<form class="form-horizontal" th:action="@{/add/} + ${processDefinitionId}" method="post">
+    <div class="form-group" th:each="fp : ${formProperties}">
+        <label th:for="${fp.id}" class="col-sm-2 control-label" th:text="${fp.name}">name</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" th:name="${fp.id}" th:id="${fp.id}"/>
+        </div>
+    </div>
+    <button type="submit">提交</button>
+</form>
+</body>
+</html>
