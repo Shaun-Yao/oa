@@ -1,6 +1,11 @@
 package com.honji.oa.controller;
 
 import com.honji.oa.service.RepairService;
+import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.cp.api.WxCpService;
+import me.chanjar.weixin.cp.bean.WxCpMessage;
+import me.chanjar.weixin.cp.config.WxCpConfigStorage;
+import me.chanjar.weixin.cp.message.WxCpMessageRouter;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -17,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -24,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-
 public class ActivitiController {
 
     @Autowired
@@ -42,8 +47,25 @@ public class ActivitiController {
     @Autowired
     private FormService formService;
 
-    @GetMapping("/repairForm/{processDefinitionId}")
-    public String repairForm(@PathVariable("processDefinitionId") String pdid, Model model) {
+    @Autowired
+    private WxCpService wxService;
+
+    @Autowired
+    private WxCpMessageRouter router;
+
+    @GetMapping("/auth")
+    public String auth(@RequestParam String code, Model model) throws WxErrorException {
+        //String code = request.getParameter("code");
+        WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
+        String[] res =  wxService.getOauth2Service().getUserInfo(code);
+        model.addAttribute("userId", res[0]);
+
+        return "index";
+    }
+
+    @GetMapping("/repairForm/{processDefinitionId}/{userId}")
+    public String repairForm(@PathVariable("processDefinitionId") String pdid,
+                             @PathVariable("userId") String userId, Model model) {
 
         //ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery().processDefinitionId(processDefinitionId).singleResult();
         //Object renderedStartForm = formService.getRenderedStartForm(processDefinitionId);
@@ -51,12 +73,13 @@ public class ActivitiController {
 
         model.addAttribute("formProperties", startFormData.getFormProperties());
         model.addAttribute("processDefinitionId", pdid);
+        model.addAttribute("userId", userId);
 
         return "repairForm";
     }
 
     @PostMapping("/add/{processDefinitionId}")
-    public String add(@PathVariable("processDefinitionId") String pdid, HttpServletRequest request) {
+    public String add(@PathVariable("processDefinitionId") String pdid, HttpServletRequest request) throws WxErrorException {
         ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionId(pdid).singleResult();
         // 先读取表单字段在根据表单字段的ID读取请求参数值
@@ -70,6 +93,15 @@ public class ActivitiController {
         }
         // 提交表单字段并启动一个新的流程实例
         ProcessInstance processInstance = formService.submitStartFormData(pdid, formValues);
+
+        String manager = request.getParameter("manager");
+        WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
+        WxCpMessage message = WxCpMessage.TEXTCARD().agentId(configStorage.getAgentId())
+                .toUser(manager).title("有新的流程待办事项")
+                .description("流程待办事项描述。。。")
+                .url("http://23b765eb.ngrok.io/toAudit/")
+                .build();
+        wxService.messageSend(message);
         return "repairForm";
     }
 
