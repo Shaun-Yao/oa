@@ -1,9 +1,11 @@
 package com.honji.oa.controller;
 
+import com.honji.oa.domain.Repair;
 import com.honji.oa.service.RepairService;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
+import me.chanjar.weixin.cp.bean.WxCpUser;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 import me.chanjar.weixin.cp.message.WxCpMessageRouter;
 import org.activiti.engine.FormService;
@@ -13,16 +15,12 @@ import org.activiti.engine.TaskService;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.form.TaskFormData;
-import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -56,12 +54,37 @@ public class ActivitiController {
     @GetMapping("/auth")
     public String auth(@RequestParam String code, Model model) throws WxErrorException {
         //String code = request.getParameter("code");
-        WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
+        //WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
         String[] res =  wxService.getOauth2Service().getUserInfo(code);
-        model.addAttribute("userId", res[0]);
+        String userId = res[0];
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee(userId).list();
+
+        model.addAttribute("tasks", tasks);
+        model.addAttribute("applicantId", res[0]);
 
         return "index";
     }
+
+
+    @GetMapping("/toApply/{applicantId}")
+    public String toApply(@PathVariable String applicantId, Model model) throws WxErrorException {
+
+        WxCpUser wxCpUser = wxService.getUserService().getById(applicantId);
+        //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
+        String name = wxCpUser.getEnglishName();
+        //model.addAttribute("processDefinitionId", processDefinitionId);
+        model.addAttribute("applicantId", applicantId);
+        model.addAttribute("applicant", name);
+
+        return "applyForm";
+    }
+
+    @PostMapping("/apply")
+    public String apply(@ModelAttribute Repair repair) {
+        repairService.apply(repair);
+        return "index";
+    }
+
 
     @GetMapping("/repairForm/{processDefinitionId}/{userId}")
     public String repairForm(@PathVariable("processDefinitionId") String pdid,
@@ -80,11 +103,10 @@ public class ActivitiController {
 
     @PostMapping("/add/{processDefinitionId}")
     public String add(@PathVariable("processDefinitionId") String pdid, HttpServletRequest request) throws WxErrorException {
-        ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery()
-                .processDefinitionId(pdid).singleResult();
+
         // 先读取表单字段在根据表单字段的ID读取请求参数值
         StartFormData formData = formService.getStartFormData(pdid);
-        Map<String, String> formValues = new HashMap<String, String>();
+        Map<String, String> formValues = new HashMap();
         // 从请求中获取表单字段的值
         List<FormProperty> formProperties = formData.getFormProperties();
         for (FormProperty formProperty : formProperties) {
@@ -94,12 +116,13 @@ public class ActivitiController {
         // 提交表单字段并启动一个新的流程实例
         ProcessInstance processInstance = formService.submitStartFormData(pdid, formValues);
 
+        Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         String manager = request.getParameter("manager");
         WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
         WxCpMessage message = WxCpMessage.TEXTCARD().agentId(configStorage.getAgentId())
                 .toUser(manager).title("有新的流程待办事项")
                 .description("流程待办事项描述。。。")
-                .url("http://23b765eb.ngrok.io/toAudit/")
+                .url("http://f32597fb.ngrok.io/toAudit/".concat(task.getId()))
                 .build();
         wxService.messageSend(message);
         return "repairForm";
@@ -107,8 +130,9 @@ public class ActivitiController {
 
     @GetMapping("/todoList")
     public String todoList(Model model) {
-        List<Task> tasks = taskService.createTaskQuery().list();
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee("518974").list();
         model.addAttribute("tasks", tasks);
+        System.out.println("tasks====" + tasks.size());
         return "todoList";
     }
 
@@ -123,7 +147,7 @@ public class ActivitiController {
     @PostMapping("/audit/{taskId}")
     public String audit(@PathVariable("taskId") String taskId, HttpServletRequest request) {
         TaskFormData taskFormData = formService.getTaskFormData(taskId);
-        Map<String, String> formValues = new HashMap<String, String>();
+        Map<String, String> formValues = new HashMap();
         // 从请求中获取表单字段的值
         List<FormProperty> formProperties = taskFormData.getFormProperties();
         for (FormProperty formProperty : formProperties) {

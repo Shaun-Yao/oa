@@ -2,6 +2,7 @@ package com.honji.oa.service;
 
 import com.honji.oa.domain.Repair;
 import com.honji.oa.repository.RepairRepository;
+import org.activiti.engine.IdentityService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
@@ -19,7 +20,7 @@ import java.util.Map;
 @Service
 public class RepairService {
 
-    private final String PROCESS_ID = "repair_process";
+    private final String PROCESS_ID = "testRepair";
 
     @Autowired
     private RepositoryService repositoryService;
@@ -33,6 +34,9 @@ public class RepairService {
     @Autowired
     private RepairRepository repairRepository;
 
+    @Autowired
+    private IdentityService identityService;
+
     public void save(Repair repaire) {
         repairRepository.save(repaire);
     }
@@ -44,24 +48,26 @@ public class RepairService {
 
 
     @Transactional
-    public void start(Repair repaire) {
-        repairRepository.save(repaire);
-        final String id = repaire.getId().toString();
+    public void apply(Repair repair) {
+        repairRepository.save(repair);
+        final String id = repair.getId().toString();
 
-        //使用流程id+.+实体id作为流程的businessKey, 例如：repair_process.1
+        //使用流程id加实体id作为流程的businessKey, 例如：repair_process-1
         final String businessKey = PROCESS_ID.concat("-").concat(id);
 //        String operator = "user1";
 //        String managers = "manager1,manager2";
+        identityService.setAuthenticatedUserId(repair.getApplicantId());
         Map<String, Object> variables = new HashMap();
-        variables.put("applicant", repaire.getApplicant());
-        variables.put("manager", repaire.getApprover());
-
+        //variables.put("applicant", repair.getApplicant());
+        variables.put("manager", "518974");
         runtimeService.startProcessInstanceByKey(PROCESS_ID, businessKey, variables);
 
 
-        Task task = taskService.createTaskQuery().processInstanceBusinessKey(businessKey).singleResult();
+        //Task task = taskService.createTaskQuery().processInstanceBusinessKey(businessKey).singleResult();
 //        taskService.claim(task.getId(), repaire.getApprover());
-          taskService.complete(task.getId(), variables);
+
+
+        //taskService.complete(task.getId());
     }
 
     @Transactional

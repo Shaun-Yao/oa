@@ -2,13 +2,13 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>todo list</title>
+    <title>index</title>
 </head>
 <body>
 <h1>index</h1>
 <br/><br/>
 <div class="with:80%">
-    <a th:href="@{/repairForm/testRepair:2:5006/} + ${userId}">发起物品维修申请</a>
+    <a th:href="@{/toApply/testRepair:2:5006/} + ${applicantId}">发起物品维修申请</a>
 </div>
 </body>
 </html>
