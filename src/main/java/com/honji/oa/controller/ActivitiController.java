@@ -16,6 +16,7 @@ import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -65,6 +66,11 @@ public class ActivitiController {
         return "index";
     }
 
+    @GetMapping("/index")
+    public String index() {
+
+        return "index";
+    }
 
     @GetMapping("/toApply/{applicantId}")
     public String toApply(@PathVariable String applicantId, Model model) throws WxErrorException {
@@ -128,12 +134,36 @@ public class ActivitiController {
         return "repairForm";
     }
 
-    @GetMapping("/todoList")
+    @RequestMapping(value = "/todoList", method = {RequestMethod.GET, RequestMethod.POST})
+    //@GetMapping("/todoList")
     public String todoList(Model model) {
-        List<Task> tasks = taskService.createTaskQuery().taskAssignee("518974").list();
-        model.addAttribute("tasks", tasks);
-        System.out.println("tasks====" + tasks.size());
+        List<Repair> repairs = repairService.findTodoList("123");
+        model.addAttribute("repairs", repairs);
         return "todoList";
+    }
+
+    @GetMapping("/toView/{id}/{taskId}")
+    public String toView(@PathVariable Long id, @PathVariable String taskId, Model model) {
+        Repair repair = repairService.findById(id);
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        String processInstanceId = task.getProcessInstanceId();
+        List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
+        model.addAttribute("repair", repair);
+        model.addAttribute("taskId", taskId);
+        model.addAttribute("comments", comments);
+        return "viewForm";
+    }
+
+    @PostMapping("/complete/{taskId}")
+    public String complete(@PathVariable String taskId, @RequestParam String comment) {
+        Map<String, Object> variables = new HashMap();
+        variables.put("repairer", "123");
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        String processInstanceId = task.getProcessInstanceId();
+        taskService.addComment(taskId, processInstanceId, comment);
+        taskService.complete(taskId, variables);
+
+        return "redirect:/todoList";
     }
 
     @GetMapping("/toAudit/{taskId}")

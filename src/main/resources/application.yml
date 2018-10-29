@@ -18,8 +18,8 @@ spring:
 
 wechat:
   cp:
-    corpId: 111
-    agentId: 111
-    secret: 111
+    corpId: ww14ab63a72288b185
+    agentId: 1000026
+    secret: rqL9FZDTiLmt-srhTN1oKet6isdO-Y9jgWDvqZK9PEo
     token: 111
     aesKey: 111

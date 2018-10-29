@@ -1,6 +1,10 @@
 package com.honji.oa.domain;
 
 import lombok.Data;
+import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -55,5 +59,29 @@ public class Repair implements Serializable {
     //@Temporal(TemporalType.TIMESTAMP)
     @Column(name = "UPDATED_TIME", columnDefinition = "timestamp", nullable = false)
     private LocalDateTime updatedTime;
+
+    /**
+     * 服务评分
+     */
+    @Column(name = "SCORE", columnDefinition = "tinyint")
+    private Integer score = 0;
+
+    // 流程任务
+    @Transient
+    private Task task;
+
+    //private Map<String, Object> variables;
+
+    // 运行中的流程实例
+    @Transient
+    private ProcessInstance processInstance;
+
+    // 历史的流程实例
+    @Transient
+    private HistoricProcessInstance historicProcessInstance;
+
+    // 流程定义
+    @Transient
+    private ProcessDefinition processDefinition;
 
 }

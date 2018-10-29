@@ -17,7 +17,7 @@
         <activiti:formProperty id="deptLeaderApproved" name="审批意见" type="string" required="true"></activiti:formProperty>
       </extensionElements>
 	</userTask>
-    <userTask activiti:exclusive="true" id="_5" name="UserTask"/>
+    <userTask activiti:exclusive="true" id="_5" name="UserTask" activiti:assignee="${repairer}"/>
     <sequenceFlow id="_6" sourceRef="testRepairSt" targetRef="_4"/>
     <sequenceFlow id="_7" sourceRef="_4" targetRef="_5"/>
     <sequenceFlow id="_8" sourceRef="_5" targetRef="_3"/>

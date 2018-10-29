@@ -11,25 +11,21 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th>任务ID</th>
-            <th>任务名称</th>
-            <th>流程实例ID</th>
-            <th>流程定义ID</th>
-            <th>任务创建时间</th>
-            <th>办理人</th>
+            <th>申请人</th>
+            <th>提交时间</th>
+            <th>故障设备名称</th>
+
             <th>操作</th>
         </tr>
         </thead>
         <tbody>
-        <tr  th:each="task : ${tasks}">
+        <tr  th:each="repair : ${repairs}">
             <!--<th scope="row" th:text="${task.id}">1</th>-->
-            <td th:text="${task.id}" ></td>
-            <td th:text="${task.name}" ></td>
-            <td th:text="${task.processInstanceId}" ></td>
-            <td th:text="${task.processDefinitionId}" ></td>
-            <td th:text="${task.createTime}" ></td>
-            <td th:text="${task.assignee}" ></td>
-            <td><a th:href="@{/toAudit/} + ${task.id}">办理</a></td>
+            <td th:text="${repair.applicant}" ></td>
+            <td th:text="${repair.createdTime}" ></td>
+            <td th:text="${repair.deviceName}" ></td>
+
+            <td><a th:href="@{/toView/} + ${repair.id} + '/' + ${repair.task.id}">办理</a></td>
 
 
         </tr>

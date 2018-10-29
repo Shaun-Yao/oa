@@ -89,8 +89,10 @@ public class RepairService {
     }
 
     public List<Repair> findTodoList(String assignee) {
+        //TODO listPage
         List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).list();
-        List<Long> ids = new ArrayList<>();
+        List<Repair> repairs = new ArrayList<>();
+        //List<Long> ids = new ArrayList<>();
 
         for(Task task : tasks) {
             ProcessInstance pi = runtimeService
@@ -98,12 +100,13 @@ public class RepairService {
                     .processInstanceId(task.getProcessInstanceId())
                     .singleResult();
             String businessKey = pi.getBusinessKey();
-            String repairId = businessKey.split("-")[1];
-            ids.add(Long.valueOf(repairId));
+            Long repairId = Long.valueOf(businessKey.split("-")[1]);
+            Repair repair = repairRepository.findById(repairId).get();
+            repair.setTask(task);
+            repairs.add(repair);
+            //ids.add(Long.valueOf(repairId));
         }
 
-        List<Repair> repairs = repairRepository.findAllById(ids);
-//        List<Repair> repairs = repairRepository.findAll(ids);
         return repairs;
     }
 }
