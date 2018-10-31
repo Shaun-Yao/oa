@@ -1,14 +1,15 @@
 package com.honji.oa.service;
 
+import com.honji.oa.config.OaConstants;
 import com.honji.oa.domain.Repair;
 import com.honji.oa.repository.RepairRepository;
-import org.activiti.engine.IdentityService;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import org.activiti.engine.*;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -20,10 +21,13 @@ import java.util.Map;
 @Service
 public class RepairService {
 
-    private final String PROCESS_ID = "testRepair";
 
     @Autowired
     private RepositoryService repositoryService;
+
+    @Autowired
+    private HistoryService historyService;
+
 
     @Autowired
     private RuntimeService runtimeService;
@@ -37,9 +41,7 @@ public class RepairService {
     @Autowired
     private IdentityService identityService;
 
-    public void save(Repair repaire) {
-        repairRepository.save(repaire);
-    }
+
 
     public Repair findById(Long id) {
         return repairRepository.findById(id).get();
@@ -53,14 +55,14 @@ public class RepairService {
         final String id = repair.getId().toString();
 
         //使用流程id加实体id作为流程的businessKey, 例如：repair_process-1
-        final String businessKey = PROCESS_ID.concat("-").concat(id);
+        final String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id);
 //        String operator = "user1";
 //        String managers = "manager1,manager2";
         identityService.setAuthenticatedUserId(repair.getApplicantId());
         Map<String, Object> variables = new HashMap();
         //variables.put("applicant", repair.getApplicant());
         variables.put("manager", "518974");
-        runtimeService.startProcessInstanceByKey(PROCESS_ID, businessKey, variables);
+        runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
 
 
         //Task task = taskService.createTaskQuery().processInstanceBusinessKey(businessKey).singleResult();
@@ -72,7 +74,7 @@ public class RepairService {
 
     @Transactional
     public boolean approver(String id) {
-        final String businessKey = PROCESS_ID.concat("-").concat(id);
+        final String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id);
         Map<String, Object> variables = new HashMap();
         variables.put("repairer", "repairer1");
         Task task = taskService.createTaskQuery().processInstanceBusinessKey(businessKey).singleResult();
@@ -88,9 +90,9 @@ public class RepairService {
         return true;
     }
 
-    public List<Repair> findTodoList(String assignee) {
-        //TODO listPage
-        List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).list();
+    public List<Repair> findTodoList(String assignee, int offset, int limit) {
+
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).listPage(offset, limit);
         List<Repair> repairs = new ArrayList<>();
         //List<Long> ids = new ArrayList<>();
 
@@ -108,5 +110,11 @@ public class RepairService {
         }
 
         return repairs;
+    }
+
+    public Page<Repair> findMyApplications(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Repair> repairPage = repairRepository.findByApplicantId(userId, pageable);
+        return repairPage;
     }
 }

@@ -1,11 +1,11 @@
 package com.honji.oa.controller;
 
+import com.honji.oa.config.OaConstants;
 import com.honji.oa.domain.Repair;
 import com.honji.oa.service.RepairService;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
-import me.chanjar.weixin.cp.bean.WxCpUser;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 import me.chanjar.weixin.cp.message.WxCpMessageRouter;
 import org.activiti.engine.FormService;
@@ -43,6 +43,7 @@ public class ActivitiController {
     @Autowired
     private RepositoryService repositoryService;
 
+
     @Autowired
     private FormService formService;
 
@@ -75,12 +76,12 @@ public class ActivitiController {
     @GetMapping("/toApply/{applicantId}")
     public String toApply(@PathVariable String applicantId, Model model) throws WxErrorException {
 
-        WxCpUser wxCpUser = wxService.getUserService().getById(applicantId);
+        //WxCpUser wxCpUser = wxService.getUserService().getById(applicantId);
         //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
-        String name = wxCpUser.getEnglishName();
+        //String name = wxCpUser.getEnglishName();
         //model.addAttribute("processDefinitionId", processDefinitionId);
         model.addAttribute("applicantId", applicantId);
-        model.addAttribute("applicant", name);
+        model.addAttribute("applicant", "yao");
 
         return "applyForm";
     }
@@ -134,28 +135,35 @@ public class ActivitiController {
         return "repairForm";
     }
 
-    @RequestMapping(value = "/todoList", method = {RequestMethod.GET, RequestMethod.POST})
+
+
+    @RequestMapping(value = "/todoList/{userId}", method = {RequestMethod.GET, RequestMethod.POST})
     //@GetMapping("/todoList")
-    public String todoList(Model model) {
-        List<Repair> repairs = repairService.findTodoList("123");
+    public String todoList(@PathVariable String userId, @RequestParam(defaultValue = "0") Integer offset,
+                           @RequestParam(defaultValue = "5") Integer limit, Model model) {
+        List<Repair> repairs = repairService.findTodoList(userId, offset, limit);
         model.addAttribute("repairs", repairs);
         return "todoList";
     }
 
-    @GetMapping("/toView/{id}/{taskId}")
-    public String toView(@PathVariable Long id, @PathVariable String taskId, Model model) {
+    @GetMapping("/toView/{id}")
+    public String toView(@PathVariable("id") Long id, Model model) {
         Repair repair = repairService.findById(id);
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        String processInstanceId = task.getProcessInstanceId();
+        String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
+        String processInstanceId = processInstance.getId();
+        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
+        //Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        //String processInstanceId = task.getProcessInstanceId();
         List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
         model.addAttribute("repair", repair);
-        model.addAttribute("taskId", taskId);
+        model.addAttribute("taskId", task.getId());
         model.addAttribute("comments", comments);
         return "viewForm";
     }
 
     @PostMapping("/complete/{taskId}")
-    public String complete(@PathVariable String taskId, @RequestParam String comment) {
+    public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
         Map<String, Object> variables = new HashMap();
         variables.put("repairer", "123");
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();

@@ -1,49 +1,107 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<!-- 引入样式 -->
-<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-<!-- 引入组件库 -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>index</title>
 </head>
 <body>
+<div class="centera">
+    <p id="oranger">
+        <a class="hover" href="javascript:;">发起申请</a>
+        <a href="javascript:;" id="myApplications">我的申请</a>
+        <a href="javascript:;">待我审批</a>
+    </p>
+    <div id="tablea" class="tablea">
+        <div class="box">
+            <a th:href="@{/toApply/518974}">发起物品维修申请</a>
+        </div>
+        <div class="box">
+            <table id="applyTable">
+                <thead>
+                <tr>
 
-<div id="app">
-<template>
-    <el-tabs v-model="activeName" @tab-click="handleClick">
-        <el-tab-pane label="发起申请" name="first">
-            <a th:href="@{/toApply/testRepair:2:5006/} + ${applicantId}">发起物品维修申请</a>
-        </el-tab-pane>
-        <el-tab-pane label="我的申请" name="second">
+                    <th>提交时间</th>
+                    <th>故障设备名称</th>
+                    <th>查看</th>
+                </tr>
+                </thead>
+                <tbody>
 
-        </el-tab-pane>
-        <el-tab-pane label="待我审批" name="third">角色管理</el-tab-pane>
-    </el-tabs>
-</template>
+                </tbody>
+            </table>
+        </div>
+        <div class="box">3333</div>
+    </div>
 </div>
 
-</body>
-<!-- import Vue before Element -->
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<!-- import JavaScript -->
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script>
-    var Main = {
-        data() {
-            return {
-                activeName: 'first'
-            };
-        },
-        methods: {
-            handleClick(tab, event) {
-                console.log(tab, event);
-            }
-        }
-    };
-    var Ctor = Vue.extend(Main)
-    new Ctor().$mount('#app')
 
+</body>
+
+<script>
+    $(function(){
+        $(".tablea").find(".box:first").show();    //为每个BOX的第一个元素显示
+        $("#oranger a").on("click",function(){ //给a标签添加事件
+            var index=$(this).index();  //获取当前a标签的个数
+            $(this).parent().next().find(".box").hide().eq(index).show(); //返回上一层，在下面查找css名为box隐藏，然后选中的显示
+            $(this).addClass("hover").siblings().removeClass("hover"); //a标签显示，同辈元素隐藏
+        })
+
+        $("#myApplications").click(function () {
+            $("#applyTable tbody").empty();
+            $.ajax({
+                type: "GET",
+                url: "/datas/myApplications/518974",
+                //data: "name=garfield&age=18",
+                dataType: "json",
+                success: function(data){
+                    var content = data.content;
+                    for(var i = 0; i < content.length; i++){
+                        var rowTem = '<tr>'
+                            + '<td>' + content[i].createdTime + '</td>'
+                            + '<td>' + content[i].deviceName + '</td>'
+                            + '<td><a href="/toView/' + content[i].id + '">查看</a></td>'
+                            + '</tr>';
+                        $("#applyTable tbody:last").append(rowTem);
+                    }
+                }
+            });
+        });
+    })
 </script>
+<style type="text/css">
+    body {
+        margin:0;
+        padding:0;
+    }
+    ul,li,p {
+        list-style:none;
+        margin:0;
+        padding:0;
+    }
+    p {
+        border:1px solid #333;
+        padding:10px 0;
+    }
+    p a {
+        padding:0 10px;
+        height:30px;
+        display:inline-block;
+        line-height:30px;
+    }
+    .centera {
+        padding:20px;
+        overflow:hidden;
+    }
+    .hover {
+        background:#eee;
+    }
+    #tablea {
+        background:#eee;
+    }
+    .box {
+        margin:10px;
+        display:none
+    }
+</style>
 </html>
