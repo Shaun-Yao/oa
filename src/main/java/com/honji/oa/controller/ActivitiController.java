@@ -7,7 +7,6 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
-import me.chanjar.weixin.cp.message.WxCpMessageRouter;
 import org.activiti.engine.FormService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
@@ -19,11 +18,13 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,44 +44,38 @@ public class ActivitiController {
     @Autowired
     private RepositoryService repositoryService;
 
-
     @Autowired
     private FormService formService;
 
     @Autowired
     private WxCpService wxService;
 
-    @Autowired
-    private WxCpMessageRouter router;
 
     @GetMapping("/auth")
     public String auth(@RequestParam String code, Model model) throws WxErrorException {
         //String code = request.getParameter("code");
         //WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
         String[] res =  wxService.getOauth2Service().getUserInfo(code);
-        String userId = res[0];
-        List<Task> tasks = taskService.createTaskQuery().taskAssignee(userId).list();
+        //String userId = res[0];
 
-        model.addAttribute("tasks", tasks);
         model.addAttribute("applicantId", res[0]);
 
         return "index";
     }
 
     @GetMapping("/index")
-    public String index() {
-
+    public String index(HttpSession session) {
+        session.setAttribute("userId", "518974");
         return "index";
     }
 
-    @GetMapping("/toApply/{applicantId}")
-    public String toApply(@PathVariable String applicantId, Model model) throws WxErrorException {
+    @GetMapping("/toApply")
+    public String toApply(Model model) throws WxErrorException {
 
         //WxCpUser wxCpUser = wxService.getUserService().getById(applicantId);
         //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
         //String name = wxCpUser.getEnglishName();
         //model.addAttribute("processDefinitionId", processDefinitionId);
-        model.addAttribute("applicantId", applicantId);
         model.addAttribute("applicant", "yao");
 
         return "applyForm";
@@ -89,9 +84,20 @@ public class ActivitiController {
     @PostMapping("/apply")
     public String apply(@ModelAttribute Repair repair) {
         repairService.apply(repair);
-        return "index";
+        return "redirect:/index";
     }
 
+    @PostMapping("/complete/{taskId}")
+    public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
+        Map<String, Object> variables = new HashMap();
+        variables.put("repairer", "123");
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        String processInstanceId = task.getProcessInstanceId();
+        taskService.addComment(taskId, processInstanceId, comment);
+        taskService.complete(taskId, variables);
+
+        return "redirect:/index";
+    }
 
     @GetMapping("/repairForm/{processDefinitionId}/{userId}")
     public String repairForm(@PathVariable("processDefinitionId") String pdid,
@@ -135,14 +141,12 @@ public class ActivitiController {
         return "repairForm";
     }
 
-
-
     @RequestMapping(value = "/todoList/{userId}", method = {RequestMethod.GET, RequestMethod.POST})
     //@GetMapping("/todoList")
     public String todoList(@PathVariable String userId, @RequestParam(defaultValue = "0") Integer offset,
                            @RequestParam(defaultValue = "5") Integer limit, Model model) {
-        List<Repair> repairs = repairService.findTodoList(userId, offset, limit);
-        model.addAttribute("repairs", repairs);
+        Page<Repair> repairPage = repairService.findTodoList(userId, offset, limit);
+        model.addAttribute("repairPage", repairPage);
         return "todoList";
     }
 
@@ -156,23 +160,14 @@ public class ActivitiController {
         //Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         //String processInstanceId = task.getProcessInstanceId();
         List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
+        Object renderedStartForm = formService.getRenderedStartForm(processInstance.getProcessDefinitionId());
+        model.addAttribute("renderedStartForm", renderedStartForm);
         model.addAttribute("repair", repair);
         model.addAttribute("taskId", task.getId());
         model.addAttribute("comments", comments);
         return "viewForm";
     }
 
-    @PostMapping("/complete/{taskId}")
-    public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
-        Map<String, Object> variables = new HashMap();
-        variables.put("repairer", "123");
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        String processInstanceId = task.getProcessInstanceId();
-        taskService.addComment(taskId, processInstanceId, comment);
-        taskService.complete(taskId, variables);
-
-        return "redirect:/todoList";
-    }
 
     @GetMapping("/toAudit/{taskId}")
     public String toEdit(@PathVariable("taskId") String taskId, Model model) {

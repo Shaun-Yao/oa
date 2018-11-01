@@ -10,11 +10,11 @@
     <p id="oranger">
         <a class="hover" href="javascript:;">发起申请</a>
         <a href="javascript:;" id="myApplications">我的申请</a>
-        <a href="javascript:;">待我审批</a>
+        <a href="javascript:;" id="todoList">待我审批</a>
     </p>
     <div id="tablea" class="tablea">
         <div class="box">
-            <a th:href="@{/toApply/518974}">发起物品维修申请</a>
+            <a th:href="@{/toApply}">发起物品维修申请</a>
         </div>
         <div class="box">
             <table id="applyTable">
@@ -31,7 +31,21 @@
                 </tbody>
             </table>
         </div>
-        <div class="box">3333</div>
+        <div class="box">
+            <table id="todoTable">
+                <thead>
+                <tr>
+
+                    <th>提交时间</th>
+                    <th>故障设备名称</th>
+                    <th>查看</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -63,6 +77,26 @@
                             + '<td><a href="/toView/' + content[i].id + '">查看</a></td>'
                             + '</tr>';
                         $("#applyTable tbody:last").append(rowTem);
+                    }
+                }
+            });
+        });
+
+        $("#todoList").click(function () {
+            $("#todoTable tbody").empty();
+            $.ajax({
+                type: "GET",
+                url: "/datas/todoList/518974",
+                dataType: "json",
+                success: function(data){
+                    var content = data.content;
+                    for(var i = 0; i < content.length; i++){
+                        var rowTem = '<tr>'
+                            + '<td>' + content[i].createdTime + '</td>'
+                            + '<td>' + content[i].deviceName + '</td>'
+                            + '<td><a href="/toView/' + content[i].id + '">查看</a></td>'
+                            + '</tr>';
+                        $("#todoTable tbody:last").append(rowTem);
                     }
                 }
             });

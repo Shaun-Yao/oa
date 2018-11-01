@@ -8,6 +8,7 @@ import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,12 +65,6 @@ public class RepairService {
         variables.put("manager", "518974");
         runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
 
-
-        //Task task = taskService.createTaskQuery().processInstanceBusinessKey(businessKey).singleResult();
-//        taskService.claim(task.getId(), repaire.getApprover());
-
-
-        //taskService.complete(task.getId());
     }
 
     @Transactional
@@ -90,11 +85,12 @@ public class RepairService {
         return true;
     }
 
-    public List<Repair> findTodoList(String assignee, int offset, int limit) {
+    public Page<Repair> findTodoList(String assignee, int page, int size) {
 
-        List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).listPage(offset, limit);
+        final int offset = page * size;
+        long total = taskService.createTaskQuery().taskAssignee(assignee).count();
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).listPage(offset, size);
         List<Repair> repairs = new ArrayList<>();
-        //List<Long> ids = new ArrayList<>();
 
         for(Task task : tasks) {
             ProcessInstance pi = runtimeService
@@ -104,12 +100,13 @@ public class RepairService {
             String businessKey = pi.getBusinessKey();
             Long repairId = Long.valueOf(businessKey.split("-")[1]);
             Repair repair = repairRepository.findById(repairId).get();
-            repair.setTask(task);
+            //repair.setTask(task);
             repairs.add(repair);
-            //ids.add(Long.valueOf(repairId));
         }
 
-        return repairs;
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Repair> repairPage = new PageImpl<>(repairs, pageable, total);
+        return repairPage;
     }
 
     public Page<Repair> findMyApplications(String userId, int page, int size) {

@@ -21,5 +21,11 @@ public class DataController {
 
     }
 
+    @GetMapping(value = "/todoList/{userId}")
+    public Page<Repair> todoList(@PathVariable String userId, @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = "5") int size) {
+        Page<Repair> repairPage = repairService.findTodoList(userId, page, size);
+        return repairPage;
+    }
 
 }
