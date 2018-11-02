@@ -157,14 +157,26 @@ public class ActivitiController {
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
         String processInstanceId = processInstance.getId();
         Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
+        String taskId = task.getId();
         //Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         //String processInstanceId = task.getProcessInstanceId();
         List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
-        Object renderedStartForm = formService.getRenderedStartForm(processInstance.getProcessDefinitionId());
+        Object renderedStartForm = formService.getRenderedTaskForm(taskId);
+
+        System.out.println(renderedStartForm);
         model.addAttribute("renderedStartForm", renderedStartForm);
         model.addAttribute("repair", repair);
-        model.addAttribute("taskId", task.getId());
+        model.addAttribute("taskId", taskId);
         model.addAttribute("comments", comments);
+        return "viewForm";
+    }
+
+    @GetMapping("/viewForm/{taskId}")
+    public String viewForm(@PathVariable String taskId, Model model) {
+
+        Object renderedStartForm = formService.getRenderedTaskForm(taskId);
+        model.addAttribute("renderedStartForm", renderedStartForm);
+
         return "viewForm";
     }
 

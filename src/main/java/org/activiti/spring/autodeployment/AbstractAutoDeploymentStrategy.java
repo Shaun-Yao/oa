@@ -43,6 +43,7 @@ public abstract class AbstractAutoDeploymentStrategy implements AutoDeploymentSt
         } else {
             resourceName = resource.getFilename();
         }
+        System.out.println("resourceName===" + resourceName);
         return resourceName;
     }
 

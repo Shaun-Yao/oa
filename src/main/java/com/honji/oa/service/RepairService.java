@@ -89,7 +89,8 @@ public class RepairService {
 
         final int offset = page * size;
         long total = taskService.createTaskQuery().taskAssignee(assignee).count();
-        List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee).listPage(offset, size);
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee)
+                .orderByTaskCreateTime().desc().listPage(offset, size);
         List<Repair> repairs = new ArrayList<>();
 
         for(Task task : tasks) {

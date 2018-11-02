@@ -16,6 +16,11 @@ spring:
     cache: false
     mode: HTML
 
+  activiti:
+    processDefinitionLocationSuffixes[0]: "**.bpmn20.xml"
+    processDefinitionLocationSuffixes[1]: "**.bpmn"
+    processDefinitionLocationSuffixes[2]: "**.form"
+
 wechat:
   cp:
     corpId: 111
