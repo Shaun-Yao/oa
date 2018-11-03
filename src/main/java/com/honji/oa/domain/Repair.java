@@ -27,6 +27,12 @@ public class Repair implements Serializable {
     private String deviceName;
 
     /**
+     * 故障设备类型
+     */
+    @Column(name = "DEVICE_TYPE", columnDefinition = "tinyint", nullable = false)
+    private int deviceType;
+
+    /**
      * 故障描述
      */
     @Column(name = "DESCRIPTION", length = 200, nullable = false)
@@ -64,7 +70,7 @@ public class Repair implements Serializable {
      * 服务评分
      */
     @Column(name = "SCORE", columnDefinition = "tinyint")
-    private Integer score = 0;
+    private int score = 0;
 
     // 流程任务
     @Transient

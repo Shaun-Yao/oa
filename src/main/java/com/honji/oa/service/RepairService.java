@@ -50,6 +50,7 @@ public class RepairService {
     }
 
 
+    //TODO 事务有问题
     @Transactional
     public void apply(Repair repair) {
         repairRepository.save(repair);
@@ -62,7 +63,8 @@ public class RepairService {
         identityService.setAuthenticatedUserId(repair.getApplicantId());
         Map<String, Object> variables = new HashMap();
         //variables.put("applicant", repair.getApplicant());
-        variables.put("manager", "518974");
+        variables.put("deviceType", repair.getDeviceType());
+        //variables.put("manager", "518974");
         runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
 
     }
@@ -112,7 +114,7 @@ public class RepairService {
 
     public Page<Repair> findMyApplications(String userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Repair> repairPage = repairRepository.findByApplicantId(userId, pageable);
+        Page<Repair> repairPage = repairRepository.findByApplicantIdOrderByCreatedTimeDesc(userId, pageable);
         return repairPage;
     }
 }

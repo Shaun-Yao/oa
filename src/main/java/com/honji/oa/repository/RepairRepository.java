@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RepairRepository extends JpaRepository<Repair, Long> {
-    Page<Repair> findByApplicantId(String userId, Pageable pageable);
+    Page<Repair> findByApplicantIdOrderByCreatedTimeDesc(String userId, Pageable pageable);
 }
