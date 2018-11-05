@@ -12,8 +12,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +50,7 @@ public class RepairService {
     }
 
 
-    //TODO 事务有问题
+    //TODO 事务有问题 可能需要implement RepairService
     @Transactional
     public void apply(Repair repair) {
         repairRepository.save(repair);
@@ -58,13 +58,16 @@ public class RepairService {
 
         //使用流程id加实体id作为流程的businessKey, 例如：repair_process-1
         final String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id);
-//        String operator = "user1";
-//        String managers = "manager1,manager2";
         identityService.setAuthenticatedUserId(repair.getApplicantId());
         Map<String, Object> variables = new HashMap();
-        //variables.put("applicant", repair.getApplicant());
-        variables.put("deviceType", repair.getDeviceType());
-        //variables.put("manager", "518974");
+        final int deviceType = repair.getDeviceType();
+        variables.put("deviceType", deviceType);
+        if(deviceType == 0) {
+            variables.put("repairer", "123");
+        } else if(deviceType == 1) {
+            variables.put("manager", "234");
+        }
+
         runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
 
     }
@@ -116,5 +119,14 @@ public class RepairService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Repair> repairPage = repairRepository.findByApplicantIdOrderByCreatedTimeDesc(userId, pageable);
         return repairPage;
+    }
+
+    @Transactional
+    public void complete(String taskId, String comment, Map<String, Object> variables) {
+
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        String processInstanceId = task.getProcessInstanceId();
+        taskService.addComment(taskId, processInstanceId, comment);
+        taskService.complete(taskId, variables);
     }
 }

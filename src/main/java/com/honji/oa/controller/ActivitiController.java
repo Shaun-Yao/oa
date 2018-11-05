@@ -91,10 +91,18 @@ public class ActivitiController {
     public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
         Map<String, Object> variables = new HashMap();
         variables.put("repairer", "123");
+        repairService.complete(taskId, comment, variables);
+        return "redirect:/index";
+    }
+
+    @PostMapping("/transfer/{taskId}")
+    public String transfer(@PathVariable("taskId") String taskId, @RequestParam String repairer, @RequestParam String comment) {
+
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
+        //task.setAssignee(repairer);
+        taskService.setAssignee(taskId, repairer);
         taskService.addComment(taskId, processInstanceId, comment);
-        taskService.complete(taskId, variables);
 
         return "redirect:/index";
     }
@@ -161,14 +169,14 @@ public class ActivitiController {
         //Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         //String processInstanceId = task.getProcessInstanceId();
         List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
-        Object renderedStartForm = formService.getRenderedTaskForm(taskId);
-
-        System.out.println(renderedStartForm);
-        model.addAttribute("renderedStartForm", renderedStartForm);
+//        Object renderedStartForm = formService.getRenderedTaskForm(taskId);
+//
+//        System.out.println(renderedStartForm);
+//        model.addAttribute("renderedStartForm", renderedStartForm);
         model.addAttribute("repair", repair);
         model.addAttribute("taskId", taskId);
         model.addAttribute("comments", comments);
-        return "viewForm";
+        return "repairForm";
     }
 
     @GetMapping("/viewForm/{taskId}")

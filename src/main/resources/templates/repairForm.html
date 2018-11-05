@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <title>repair form</title>
 </head>
 <body>
@@ -24,6 +25,13 @@
         </div>
     </div>
 
+    <div class="form-group">
+        <label for="transferId" class="col-sm-2 control-label">分派电工</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="transferId" id="transferId" value="456" />
+        </div>
+    </div>
+
     <div class="form-group" th:each="comment : ${comments}">
         <span th:text="${comment.time}"></span>
         <span th:text="${comment.fullMessage}"></span>
@@ -32,6 +40,24 @@
     <input type="text" class="form-control" name="comment" id="comment" />
 
     <button type="submit">提交</button>
+    <button type="button" id="transfer">分派</button>
 </form>
 </body>
+<script th:inline="javascript">
+    $('#transfer').click(function () {
+        console.log([[${taskId}]]);
+        $.ajax({
+            type: "POST",
+            url: "/transfer/" + [[${taskId}]],
+            data: {
+                "repairer": $('#transferId').val(),
+                "comment": $('#comment').val()
+            },
+            dataType: "json",
+            success: function(data){
+                console.log(6666);
+            }
+        });
+    });
+</script>
 </html>
