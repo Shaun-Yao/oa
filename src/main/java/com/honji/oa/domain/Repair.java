@@ -3,7 +3,6 @@ package com.honji.oa.domain;
 import lombok.Data;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -80,7 +79,7 @@ public class Repair implements Serializable {
 
     // 运行中的流程实例
     @Transient
-    private ProcessInstance processInstance;
+    private String processInstanceId;
 
     // 历史的流程实例
     @Transient

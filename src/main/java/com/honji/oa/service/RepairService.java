@@ -63,9 +63,9 @@ public class RepairService {
         final int deviceType = repair.getDeviceType();
         variables.put("deviceType", deviceType);
         if(deviceType == 0) {
-            variables.put("repairer", "123");
+            variables.put("handler", "123");
         } else if(deviceType == 1) {
-            variables.put("manager", "234");
+            variables.put("handler", "234");
         }
 
         runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
@@ -106,7 +106,7 @@ public class RepairService {
             String businessKey = pi.getBusinessKey();
             Long repairId = Long.valueOf(businessKey.split("-")[1]);
             Repair repair = repairRepository.findById(repairId).get();
-            //repair.setTask(task);
+            repair.setProcessInstanceId(pi.getId());
             repairs.add(repair);
         }
 
@@ -116,6 +116,22 @@ public class RepairService {
     }
 
     public Page<Repair> findMyApplications(String userId, int page, int size) {
+        /*final int offset = page * size;
+        long total = runtimeService.createProcessInstanceQuery().startedBy(userId).count();
+        List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery()
+                .startedBy(userId).orderByProcessInstanceId().desc().listPage(offset, size);
+        List<Repair> repairs = new ArrayList<>();
+
+        for(ProcessInstance pi : processInstances) {
+            String businessKey = pi.getBusinessKey();
+            Long repairId = Long.valueOf(businessKey.split("-")[1]);
+            Repair repair = repairRepository.findById(repairId).get();
+            repair.setProcessInstanceId(pi.getId());
+            repairs.add(repair);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Repair> repairPage = new PageImpl<>(repairs, pageable, total);*/
         Pageable pageable = PageRequest.of(page, size);
         Page<Repair> repairPage = repairRepository.findByApplicantIdOrderByCreatedTimeDesc(userId, pageable);
         return repairPage;
@@ -128,5 +144,17 @@ public class RepairService {
         String processInstanceId = task.getProcessInstanceId();
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId, variables);
+    }
+
+    @Transactional
+    public void finish(String taskId, String comment, Repair repair) {
+        Repair dbRepair = repairRepository.getOne(repair.getId());
+        dbRepair.setScore(repair.getScore());
+        repairRepository.save(dbRepair);
+
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        String processInstanceId = task.getProcessInstanceId();
+        taskService.addComment(taskId, processInstanceId, comment);
+        taskService.complete(taskId);
     }
 }

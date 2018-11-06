@@ -8,12 +8,13 @@ import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 import org.activiti.engine.FormService;
-import org.activiti.engine.RepositoryService;
+import org.activiti.engine.HistoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.form.TaskFormData;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
@@ -42,7 +43,7 @@ public class ActivitiController {
     private TaskService taskService;
 
     @Autowired
-    private RepositoryService repositoryService;
+    private HistoryService historyService;
 
     @Autowired
     private FormService formService;
@@ -87,11 +88,30 @@ public class ActivitiController {
         return "redirect:/index";
     }
 
+    /**
+     * 完成任务
+     * @param taskId
+     * @param comment
+     * @return
+     */
     @PostMapping("/complete/{taskId}")
     public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
         Map<String, Object> variables = new HashMap();
-        variables.put("repairer", "123");
+        variables.put("handler", "518974");
         repairService.complete(taskId, comment, variables);
+        return "redirect:/index";
+    }
+
+    /**
+     * 结束流程
+     * @param taskId
+     * @param comment
+     * @return
+     */
+    @PostMapping("/finish/{taskId}")
+    public String finish(@PathVariable("taskId") String taskId, @RequestParam String comment, @ModelAttribute Repair repair) {
+
+        repairService.finish(taskId, comment, repair);
         return "redirect:/index";
     }
 
@@ -163,13 +183,17 @@ public class ActivitiController {
         Repair repair = repairService.findById(id);
         String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
-        String processInstanceId = processInstance.getId();
-        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
+        //TODO 获取不到结束流程
+        HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
+        //String processInstanceId = processInstance.getId();
+        Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         String taskId = task.getId();
-        //Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        //String processInstanceId = task.getProcessInstanceId();
-        List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
-//        Object renderedStartForm = formService.getRenderedTaskForm(taskId);
+
+
+        List<Comment> comments = taskService.getProcessInstanceComments(hpi.getId());
+        //HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
+
+// Object renderedStartForm = formService.getRenderedTaskForm(taskId);
 //
 //        System.out.println(renderedStartForm);
 //        model.addAttribute("renderedStartForm", renderedStartForm);
