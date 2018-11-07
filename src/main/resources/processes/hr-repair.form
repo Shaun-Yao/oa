@@ -1,4 +1,4 @@
-
+<input type="text" class="form-control" name="id" id="id" value="${id}" />
 <input type="text" class="form-control" name="taskId" id="taskId" value="${taskId}" />
 
         <div class="form-group">

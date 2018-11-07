@@ -42,6 +42,8 @@ public class RepairService {
     @Autowired
     private IdentityService identityService;
 
+    @Autowired
+    private FormService formService;
 
 
     public Repair findById(Long id) {
@@ -68,8 +70,17 @@ public class RepairService {
             variables.put("handler", "234");
         }
 
-        runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
-
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
+        Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
+        String taskId = task.getId();
+        Map<String, String> formData = new HashMap();
+        formData.put("id", String.valueOf(repair.getId()));
+        formData.put("taskId", taskId);
+        formData.put("deviceName", repair.getDeviceName());
+        formData.put("deviceType", String.valueOf(repair.getDeviceType()));
+        formData.put("description", repair.getDescription());
+        formData.put("createdTime", repair.getCreatedTime().toString());
+        formService.saveFormData(taskId, formData);
     }
 
     @Transactional
@@ -144,6 +155,13 @@ public class RepairService {
         String processInstanceId = task.getProcessInstanceId();
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId, variables);
+
+        //完成任务后需要设置下一次任务的id到formData
+        Task nextTask = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
+        String nextTaskId = nextTask.getId();
+        Map<String, String> formData = new HashMap();
+        formData.put("taskId", nextTaskId);
+        formService.saveFormData(nextTaskId, formData);
     }
 
     @Transactional

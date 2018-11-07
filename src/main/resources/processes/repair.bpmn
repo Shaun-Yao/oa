@@ -4,8 +4,8 @@
     <startEvent id="repair_start_event" name="StartEvent" activiti:initiator="applicant"/>
     <exclusiveGateway gatewayDirection="Unspecified" id="type_gateway" name="ExclusiveGateway"/>
     <sequenceFlow id="_4" sourceRef="repair_start_event" targetRef="type_gateway"/>
-    <userTask activiti:exclusive="true" id="manager_task" name="行政经理审批" activiti:assignee="${handler}"/>
-    <userTask activiti:exclusive="true" id="repairer_task" name="电工负责人处理" activiti:assignee="${handler}"/>
+    <userTask activiti:exclusive="true" id="manager_task" name="行政经理审批" activiti:assignee="${handler}" activiti:formKey="hr-repair.form"/>
+    <userTask activiti:exclusive="true" id="repairer_task" name="电工负责人处理" activiti:assignee="${handler}" activiti:formKey="repairer.form"/>
     <sequenceFlow id="_7" name="小件物品" sourceRef="type_gateway" targetRef="repairer_task">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${deviceType == 0}]]></conditionExpression>
     </sequenceFlow>
@@ -13,7 +13,7 @@
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${deviceType == 1}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="_5" sourceRef="manager_task" targetRef="repairer_task"/>
-    <userTask activiti:exclusive="true" id="applicant_task" name="申请人确认评分" activiti:assignee="${handler}"/>
+    <userTask activiti:exclusive="true" id="applicant_task" name="申请人确认评分" activiti:assignee="${handler}" activiti:formKey="applicant-repair.form"/>
     <sequenceFlow id="_9" sourceRef="repairer_task" targetRef="applicant_task"/>
     <endEvent id="repair_end_event" name="EndEvent"/>
     <sequenceFlow id="_11" sourceRef="applicant_task" targetRef="repair_end_event"/>

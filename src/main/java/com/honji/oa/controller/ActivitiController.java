@@ -94,12 +94,13 @@ public class ActivitiController {
      * @param comment
      * @return
      */
+    @ResponseBody
     @PostMapping("/complete/{taskId}")
-    public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
+    public void complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
         Map<String, Object> variables = new HashMap();
         variables.put("handler", "518974");
         repairService.complete(taskId, comment, variables);
-        return "redirect:/index";
+        //return "redirect:/index";
     }
 
     /**
@@ -108,11 +109,12 @@ public class ActivitiController {
      * @param comment
      * @return
      */
+    @ResponseBody
     @PostMapping("/finish/{taskId}")
-    public String finish(@PathVariable("taskId") String taskId, @RequestParam String comment, @ModelAttribute Repair repair) {
+    public void finish(@PathVariable("taskId") String taskId, @RequestParam String comment, @ModelAttribute Repair repair) {
 
         repairService.finish(taskId, comment, repair);
-        return "redirect:/index";
+        //return "redirect:/index";
     }
 
     @PostMapping("/transfer/{taskId}")
@@ -183,25 +185,41 @@ public class ActivitiController {
         Repair repair = repairService.findById(id);
         String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
-        //TODO 获取不到结束流程
-        HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
-        //String processInstanceId = processInstance.getId();
+        String processInstanceId = null;
+        if(processInstance == null) {
+            //TODO 获取不到结束流程
+            HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
+            processInstanceId = hpi.getId();
+            System.out.println(333);
+        } else {
+            processInstanceId = processInstance.getId();
+        }
+
+        List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
+
+        model.addAttribute("repair", repair);
+        model.addAttribute("comments", comments);
+        return "viewForm";
+    }
+
+
+    @GetMapping("/toAudit/{id}")
+    public String toAudit(@PathVariable Long id, Model model) {
+        Repair repair = repairService.findById(id);
+        String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
         Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
-        String taskId = task.getId();
+        final String taskId = task.getId();
+        List<Comment> comments = taskService.getProcessInstanceComments(processInstance.getId());
 
-
-        List<Comment> comments = taskService.getProcessInstanceComments(hpi.getId());
-        //HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
-
-// Object renderedStartForm = formService.getRenderedTaskForm(taskId);
-//
-//        System.out.println(renderedStartForm);
-//        model.addAttribute("renderedStartForm", renderedStartForm);
+        Object renderedStartForm = formService.getRenderedTaskForm(taskId);
+        model.addAttribute("renderedStartForm", renderedStartForm);
         model.addAttribute("repair", repair);
         model.addAttribute("taskId", taskId);
         model.addAttribute("comments", comments);
-        return "repairForm";
+        return "auditForm";
     }
+
 
     @GetMapping("/viewForm/{taskId}")
     public String viewForm(@PathVariable String taskId, Model model) {
@@ -212,14 +230,6 @@ public class ActivitiController {
         return "viewForm";
     }
 
-
-    @GetMapping("/toAudit/{taskId}")
-    public String toEdit(@PathVariable("taskId") String taskId, Model model) {
-        TaskFormData taskFormData = formService.getTaskFormData(taskId);
-        model.addAttribute("formProperties", taskFormData.getFormProperties());
-        model.addAttribute("taskId", taskId);
-        return "auditForm";
-    }
 
     @PostMapping("/audit/{taskId}")
     public String audit(@PathVariable("taskId") String taskId, HttpServletRequest request) {
