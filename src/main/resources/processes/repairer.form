@@ -1,28 +1,30 @@
-<input type="text" class="form-control" name="id" id="id" value="${id}" />
-<input type="text" class="form-control" name="taskId" id="taskId" value="${taskId}" />
+<input type="hidden" class="form-control" name="id" id="id" value="${id}" />
+<input type="hidden" class="form-control" name="taskId" id="taskId" value="${taskId}" />
 
-        <div class="form-group">
-            <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="deviceName" id="deviceName" value="${deviceName}" />
-            </div>
-        </div>
+  <div class="form-group">
+      <label for="createdTime" class="col-sm-2 control-label">申请时间</label>
+      <input type="text" class="form-control" readonly name="createdTime" id="createdTime" value="${createdTime}" />
+  </div>
 
-        <div class="form-group">
-            <label for="description" class="col-sm-2 control-label">故障描述</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="description" id="description" value="${description}" />
-            </div>
-        </div>
+  <div class="form-group">
+      <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
+      <input type="text" class="form-control" readonly name="deviceName" id="deviceName" value="${deviceName}" />
+  </div>
 
-         <div class="form-group">
-            <label for="transferId" class="col-sm-2 control-label">分派电工</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="transferId" id="transferId" value="456" />
-            </div>
-        </div>
+  <div class="form-group">
+      <label for="description" class="col-sm-2 control-label">故障描述</label>
+      <textarea class="form-control" readonly name="description" id="description" rows="3" >${description}</textarea>
+  </div>
 
-        <input type="text" class="form-control" name="comment" id="comment" />
+ <div class="form-group">
+    <label for="transferId" class="col-sm-2 control-label">分派电工</label>
+    <input type="text" class="form-control" name="transferId" id="transferId" value="456" />
+</div>
 
-        <button type="button" id="submit">提交</button>
-        <button type="button" id="transfer">分派</button>
+<div class="form-group">
+      <label for="comment" class="col-sm-2 control-label">备注意见</label>
+      <textarea class="form-control" name="comment" id="comment" rows="3" required="required"></textarea>
+</div>
+
+<button type="button" id="submit" class="btn btn-primary">提交</button>
+<button type="button" id="transfer" class="btn btn-primary">分派</button>

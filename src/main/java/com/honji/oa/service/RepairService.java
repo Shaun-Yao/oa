@@ -2,6 +2,7 @@ package com.honji.oa.service;
 
 import com.honji.oa.config.OaConstants;
 import com.honji.oa.domain.Repair;
+import com.honji.oa.enums.ProcessStatus;
 import com.honji.oa.repository.RepairRepository;
 import org.activiti.engine.*;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -55,6 +56,7 @@ public class RepairService {
     //TODO 事务有问题 可能需要implement RepairService
     @Transactional
     public void apply(Repair repair) {
+        System.out.println("applicat==" + repair.getApplicantId().equals(""));
         repairRepository.save(repair);
         final String id = repair.getId().toString();
 
@@ -127,9 +129,11 @@ public class RepairService {
     }
 
     public Page<Repair> findMyApplications(String userId, int page, int size) {
-        /*final int offset = page * size;
-        long total = runtimeService.createProcessInstanceQuery().startedBy(userId).count();
-        List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery()
+       /* final int offset = page * size;
+        long total = historyService.createHistoricProcessInstanceQuery().startedBy(userId).count();
+//        List<HistoricProcessInstance> processInstances = historyService.createHistoricProcessInstanceQuery()
+//                .startedBy(userId).orderByProcessInstanceId().desc().listPage(offset, size);
+         List<ProcessInstance> processInstances = runtimeService.createProcessInstanceQuery()
                 .startedBy(userId).orderByProcessInstanceId().desc().listPage(offset, size);
         List<Repair> repairs = new ArrayList<>();
 
@@ -137,7 +141,8 @@ public class RepairService {
             String businessKey = pi.getBusinessKey();
             Long repairId = Long.valueOf(businessKey.split("-")[1]);
             Repair repair = repairRepository.findById(repairId).get();
-            repair.setProcessInstanceId(pi.getId());
+            //Task task = taskService.createTaskQuery().processInstanceBusinessKey(businessKey).singleResult();
+            System.out.println(pi.getName());
             repairs.add(repair);
         }
 
@@ -153,6 +158,7 @@ public class RepairService {
 
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
+        identityService.setAuthenticatedUserId(String.valueOf(variables.get("handler")));
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId, variables);
 
@@ -168,10 +174,13 @@ public class RepairService {
     public void finish(String taskId, String comment, Repair repair) {
         Repair dbRepair = repairRepository.getOne(repair.getId());
         dbRepair.setScore(repair.getScore());
+        dbRepair.setStatus(ProcessStatus.FINISHED);//设置为结束状态
         repairRepository.save(dbRepair);
 
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
+
+
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId);
     }

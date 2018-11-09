@@ -3,38 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <title>repair form</title>
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 </head>
 <body>
-<form class="form-horizontal" th:action="@{/apply}" method="post">
+<form role="form" th:action="@{/apply}" method="post">
 
-    <input type="text" class="form-control" name="applicantId" id="applicantId" th:value="${session.userId}"/>
-    <input type="text" class="form-control" name="applicant" id="applicant" th:value="${applicant}"/>
+    <input type="text" name="applicantId" id="applicantId" th:value="${session.userId}"/>
+    <input type="hidden" name="applicant" id="applicant" th:value="${applicant}"/>
 
     <div class="form-group">
         <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control" name="deviceName" id="deviceName" />
-        </div>
+        <input type="text" class="form-control" name="deviceName" id="deviceName" required="required" />
     </div>
 
     <div class="form-group">
-        <label for="deviceType" class="col-sm-2 control-label">故障设备名称</label>
-        <div class="col-sm-10">
-            <select name="deviceType" id="deviceType">
-                <option value ="0">小件物品</option>
-                <option value ="1">大件物品</option>
-            </select>
+
+        <div class="radio">
+            <label>
+                <input type="radio" name="deviceType" id="optionsRadios1" value="0" checked>小件物品
+            </label>
+            <label>
+                <input type="radio" name="deviceType" id="optionsRadios2" value="1">大件物品
+            </label>
         </div>
+
     </div>
 
     <div class="form-group">
         <label for="description" class="col-sm-2 control-label">故障描述</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control" name="description" id="description" />
-        </div>
+        <textarea class="form-control" name="description" id="description" rows="3" required="required"></textarea>
     </div>
 
-    <button type="submit">提交</button>
+    <button type="submit" class="btn btn-primary">提交</button>
+    <button type="button" onclick="goBack()" class="btn btn-info">返回</button>
 </form>
 </body>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
 </html>

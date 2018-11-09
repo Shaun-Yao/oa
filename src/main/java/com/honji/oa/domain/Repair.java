@@ -1,5 +1,6 @@
 package com.honji.oa.domain;
 
+import com.honji.oa.enums.ProcessStatus;
 import lombok.Data;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -8,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -22,6 +24,7 @@ public class Repair implements Serializable {
     /**
      * 故障设备名称
      */
+    @NotEmpty
     @Column(name = "DEVICE_NAME", length = 30, nullable = false)
     private String deviceName;
 
@@ -40,12 +43,14 @@ public class Repair implements Serializable {
     /**
      * 申请人id
      */
+    @NotEmpty
     @Column(name = "APPLICANT_ID", length = 20, nullable = false)
     private String applicantId;
 
     /**
      * 申请人名字
      */
+    @NotEmpty
     @Column(name = "APPLICANT", length = 10, nullable = false)
     private String applicant;
 
@@ -70,6 +75,13 @@ public class Repair implements Serializable {
      */
     @Column(name = "SCORE", columnDefinition = "tinyint")
     private int score = 0;
+
+    /**
+     * 流程状态
+     */
+    @Enumerated
+    @Column(name = "STATUS", columnDefinition = "tinyint", nullable = false)
+    private ProcessStatus status = ProcessStatus.UNDER_AUDIT;
 
     // 流程任务
     @Transient

@@ -67,6 +67,7 @@ public class ActivitiController {
     @GetMapping("/index")
     public String index(HttpSession session) {
         session.setAttribute("userId", "518974");
+        session.setAttribute("userName", "yao");
         return "index";
     }
 
@@ -187,10 +188,9 @@ public class ActivitiController {
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
         String processInstanceId = null;
         if(processInstance == null) {
-            //TODO 获取不到结束流程
             HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
             processInstanceId = hpi.getId();
-            System.out.println(333);
+
         } else {
             processInstanceId = processInstance.getId();
         }
