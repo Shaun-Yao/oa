@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>repair form</title>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -9,13 +10,45 @@
 
 </head>
 <body>
-<div th:utext="${renderedStartForm}" />
-<div class="form-group" th:each="comment : ${comments}">
-    <span th:text="${comment.time}"></span>
-    <span th:text="${comment.fullMessage}"></span>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">物品维修申请</h3>
+    </div>
+    <div class="panel-body">
+        <form role="form" th:action="@{/complete/} + ${taskId}" method="post">
+            <div th:utext="${renderedStartForm}" />
+        </form>
+        <div class="panel panel-default invisible" id="comments">
+            <div class="panel-heading">审批流程</div>
+            <table class="table table-large">
+
+            </table>
+        </div>
+    </div>
 </div>
 </body>
 <script th:inline="javascript">
+
+    function goBack() {
+        window.history.back();
+    }
+
+    $(function(){
+        var comments = [[${comments}]];
+        if (comments.length > 0) {
+            $('#comments').insertBefore($('#commentGroup'));
+            $('#comments').removeClass("invisible");
+            for (i = 0; i < comments.length; i++) {
+                //var time  = new Date(comments[i].time).toLocaleString('zh-Hans-CN');
+                var time  = new Date(comments[i].time).toLocaleString();
+                var comment = "<tr><td>" + comments[i].userId + ": " + comments[i].fullMessage
+                    + "</td><td>" + time + "</td></tr>";
+                $('#comments > table').append(comment);
+            }
+        }
+    });
+/*
+
     $('#submit').click(function () {
 
         $.ajax({
@@ -32,12 +65,13 @@
             }
         });
     });
+*/
 
     $('#finish').click(function () {
 
         $.ajax({
             type: "POST",
-            //async:false,
+            async: false,
             url: "/finish/" + $('#taskId').val(),
             data: {
                 "id": $('#id').val(),
@@ -46,9 +80,11 @@
             },
             dataType: "json",
             success: function(data){
-                document.location.href='/index';
+                console.log(2323);
+                window.location.href='/index';
             }
         });
     });
+
 </script>
 </html>

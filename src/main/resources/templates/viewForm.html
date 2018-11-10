@@ -2,30 +2,52 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
     <title>repair form</title>
 </head>
 <body>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">物品维修申请</h3>
+    </div>
+    <div class="panel-body">
+        <div class="form-group">
+        <label for="createdTime" class="col-sm-2 control-label">申请时间</label>
+        <input type="text" class="form-control" readonly name="createdTime" id="createdTime" th:value="${repair.createdTime}" />
+    </div>
 
-<div class="form-group">
-    <label for="createdTime" class="col-sm-2 control-label">申请时间</label>
-    <input type="text" class="form-control" readonly name="createdTime" id="createdTime" th:value="${repair.createdTime}" />
+        <div class="form-group">
+            <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
+            <input type="text" class="form-control" readonly name="deviceName" id="deviceName" th:value="${repair.deviceName}" />
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="col-sm-2 control-label">故障描述</label>
+            <textarea class="form-control" readonly name="description" id="description" rows="3" th:text="${repair.description}"></textarea>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">备注内容</div>
+            <table class="table table-large">
+
+                <tr th:each="comment : ${comments}">
+                    <td th:text="${comment.userId} + ':' +${comment.fullMessage}"></td>
+                    <td th:text="${#dates.format(comment.time,'yyyy-MM-dd HH:mm')}"></td>
+                </tr>
+
+            </table>
+        </div>
+        <button type="button" onclick="goBack()" class="btn btn-info btn-block">返回</button>
+    </div>
 </div>
 
-<div class="form-group">
-    <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-    <input type="text" class="form-control" readonly name="deviceName" id="deviceName" th:value="${repair.deviceName}" />
-</div>
-
-<div class="form-group">
-    <label for="description" class="col-sm-2 control-label">故障描述</label>
-    <textarea class="form-control" readonly name="description" id="description" rows="3" th:text="${repair.description}"></textarea>
-</div>
-
-<div class="form-group" th:each="comment : ${comments}">
-    <span th:text="${#dates.format(comment.time,'yyyy-MM-dd HH:mm')}"></span>
-    <span th:text="${comment.userId}"></span>
-    <span th:text="${comment.fullMessage}"></span>
-</div>
 </body>
+<script>
+    function goBack() {
+        window.history.back();
+    }
+</script>
+<style type="text/css">
+
+</style>
 </html>

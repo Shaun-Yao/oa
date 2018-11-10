@@ -1,28 +1,40 @@
 
-<input type="text" class="form-control" name="id" id="id" value="${id}" />
-<input type="text" class="form-control" name="taskId" id="taskId" value="${taskId}" />
+    <input type="hidden" class="form-control" name="id" id="id" value="${id}" />
+    <input type="hidden" class="form-control" name="taskId" id="taskId" value="${taskId}" />
 
-        <div class="form-group">
-            <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="deviceName" id="deviceName" value="${deviceName}" />
-            </div>
+    <div class="form-group">
+        <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="deviceName" id="deviceName" value="${deviceName}" />
         </div>
+    </div>
 
-        <div class="form-group">
-            <label for="description" class="col-sm-2 control-label">故障描述</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="description" id="description" value="${description}" />
-            </div>
+    <div class="form-group">
+        <label for="description" class="col-sm-2 control-label">故障描述</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" name="description" id="description" value="${description}" />
         </div>
+    </div>
 
-        <div class="form-group">
-            <label for="score" class="col-sm-2 control-label">服务评分</label>
-            <div class="col-sm-10">
-                <input type="text" class="form-control" name="score" id="score" />
-            </div>
+    <div class="form-group">
+        <label for="score" class="col-sm-2 control-label">服务评分</label>
+        <div class="col-sm-10">
+            <select name="score" id="score" class="form-control">
+                  <option value="5">5星</option>
+                  <option value="4">4星</option>
+                  <option value="3">3星</option>
+                  <option value="2">2星</option>
+                  <option value="1">1星</option>
+             </select>
         </div>
+    </div>
 
-        <input type="text" class="form-control" name="comment" id="comment" />
+    <div class="form-group" id="commentGroup">
+          <label for="comment" class="col-sm-2 control-label">备注意见</label>
+          <textarea class="form-control" name="comment" id="comment" rows="3" required="required">完成</textarea>
+    </div>
 
-        <button type="button" id="finish">完成</button>
+    <div class="col-md-4 text-center">
+        <button type="button" id="finish" class="btn btn-primary btn-lg">完成</button>
+        <button type="button" onclick="goBack()" class="btn btn-primary btn-lg">返回</button>
+    </div>

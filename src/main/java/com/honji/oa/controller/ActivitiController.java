@@ -7,10 +7,7 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
-import org.activiti.engine.FormService;
-import org.activiti.engine.HistoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
+import org.activiti.engine.*;
 import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.form.TaskFormData;
@@ -47,6 +44,9 @@ public class ActivitiController {
 
     @Autowired
     private FormService formService;
+
+    @Autowired
+    private IdentityService identityService;
 
     @Autowired
     private WxCpService wxService;
@@ -95,13 +95,15 @@ public class ActivitiController {
      * @param comment
      * @return
      */
-    @ResponseBody
+    //@ResponseBody
     @PostMapping("/complete/{taskId}")
-    public void complete(@PathVariable("taskId") String taskId, @RequestParam String comment) {
+    public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment, HttpSession session) {
         Map<String, Object> variables = new HashMap();
         variables.put("handler", "518974");
+        //添加备注前需要先设置当前用户名作为备注的userId
+        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute("userName")));
         repairService.complete(taskId, comment, variables);
-        //return "redirect:/index";
+        return "redirect:/index";
     }
 
     /**
@@ -112,8 +114,10 @@ public class ActivitiController {
      */
     @ResponseBody
     @PostMapping("/finish/{taskId}")
-    public void finish(@PathVariable("taskId") String taskId, @RequestParam String comment, @ModelAttribute Repair repair) {
-
+    public void finish(@PathVariable("taskId") String taskId, @RequestParam String comment,
+                       @ModelAttribute Repair repair, HttpSession session) {
+        //添加备注前需要先设置当前用户名作为备注的userId
+        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute("userName")));
         repairService.finish(taskId, comment, repair);
         //return "redirect:/index";
     }

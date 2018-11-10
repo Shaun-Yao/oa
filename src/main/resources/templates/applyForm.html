@@ -2,43 +2,54 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>repair form</title>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 </head>
 <body>
-<form role="form" th:action="@{/apply}" method="post">
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">物品维修申请</h3>
+    </div>
+    <div class="panel-body">
+        <form role="form" th:action="@{/apply}" method="post">
 
-    <input type="text" name="applicantId" id="applicantId" th:value="${session.userId}"/>
-    <input type="hidden" name="applicant" id="applicant" th:value="${applicant}"/>
+            <input type="hidden" name="applicantId" id="applicantId" th:value="${session.userId}"/>
+            <input type="hidden" name="applicant" id="applicant" th:value="${applicant}"/>
 
-    <div class="form-group">
-        <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-        <input type="text" class="form-control" name="deviceName" id="deviceName" required="required" />
+            <div class="form-group">
+                <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
+                <input type="text" class="form-control" name="deviceName" id="deviceName" required="required" />
+            </div>
+
+            <div class="form-group">
+
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="deviceType" id="optionsRadios1" value="0" checked>小件物品
+                    </label>
+                    <label>
+                        <input type="radio" name="deviceType" id="optionsRadios2" value="1">大件物品
+                    </label>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="description" class="col-sm-2 control-label">故障描述</label>
+                <textarea class="form-control" name="description" id="description" rows="3" required="required"></textarea>
+            </div>
+
+            <div class="col-md-4 text-center">
+                <button type="submit" class="btn btn-primary btn-lg">提交</button>
+                <button type="button" onclick="goBack()" class="btn btn-info btn-lg">返回</button>
+            </div>
+        </form>
     </div>
 
-    <div class="form-group">
-
-        <div class="radio">
-            <label>
-                <input type="radio" name="deviceType" id="optionsRadios1" value="0" checked>小件物品
-            </label>
-            <label>
-                <input type="radio" name="deviceType" id="optionsRadios2" value="1">大件物品
-            </label>
-        </div>
-
-    </div>
-
-    <div class="form-group">
-        <label for="description" class="col-sm-2 control-label">故障描述</label>
-        <textarea class="form-control" name="description" id="description" rows="3" required="required"></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-primary">提交</button>
-    <button type="button" onclick="goBack()" class="btn btn-info">返回</button>
-</form>
+</div>
 </body>
 <script>
     function goBack() {

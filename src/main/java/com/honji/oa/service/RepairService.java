@@ -67,9 +67,9 @@ public class RepairService {
         final int deviceType = repair.getDeviceType();
         variables.put("deviceType", deviceType);
         if(deviceType == 0) {
-            variables.put("handler", "123");
+            variables.put("handler", "518974");
         } else if(deviceType == 1) {
-            variables.put("handler", "234");
+            variables.put("handler", "518974");
         }
 
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
@@ -158,7 +158,6 @@ public class RepairService {
 
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
-        identityService.setAuthenticatedUserId(String.valueOf(variables.get("handler")));
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId, variables);
 

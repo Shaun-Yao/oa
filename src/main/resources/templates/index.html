@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>index</title>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -10,7 +11,9 @@
 
 </head>
 <body>
-<ul id="myTab" class="nav nav-tabs">
+<div class="container">
+    <div class="row">
+<ul id="myTab" class="nav nav-pills">
     <li class="active">
         <a href="#home" data-toggle="tab">
             发起申请
@@ -26,7 +29,11 @@
 </ul>
 <div id="myTabContent" class="tab-content">
     <div class="tab-pane fade in active" id="home">
-        <p><a th:href="@{/toApply}">发起物品维修申请</a></p>
+        <ul class="list-group">
+            <li class="list-group-item"><a th:href="@{/toApply}">发起物品维修申请</a></li>
+
+        </ul>
+
     </div>
     <div class="tab-pane fade" id="second">
         <div class="table-responsive">
@@ -62,9 +69,9 @@
          </table>
      </div>
     </div>
-
 </div>
-
+</div>
+</div>
 </body>
 
 <script>
@@ -102,7 +109,7 @@
             $("#todoTable tbody").empty();
             $.ajax({
                 type: "GET",
-                url: "/datas/todoList/123",
+                url: "/datas/todoList/518974",
                 dataType: "json",
                 success: function(data){
                     var content = data.content;
