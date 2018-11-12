@@ -18,8 +18,8 @@
 
  <div class="form-group">
     <label for="transferId" class="col-sm-2 control-label">分派电工</label>
-    <select name="transferId" id="transferId" class="form-control">
-
+    <select name="transferId" id="transferId" class='form-control'>
+        <option value="">请选择</option>
     </select>
 </div>
 
@@ -28,7 +28,7 @@
       <textarea class="form-control" name="comment" id="comment" rows="3" required="required"></textarea>
 </div>
 <div class="col-md-4 text-center">
-    <button type="submit" id="submit" class="btn btn-primary btn-lg">提交</button>
+    <button type="button" id="submitBtn" class="btn btn-primary btn-lg">提交</button>
     <button type="button" id="transfer" class="btn btn-primary btn-lg">分派</button>
     <button type="button" onclick="goBack()" class="btn btn-primary btn-lg">返回</button>
 </div>

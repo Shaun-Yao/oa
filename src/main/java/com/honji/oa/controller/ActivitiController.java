@@ -65,7 +65,8 @@ public class ActivitiController {
     }
 
     @GetMapping("/index")
-    public String index(HttpSession session) {
+    public String index(@RequestParam(required = false) String tab, Model model, HttpSession session) {
+        model.addAttribute("tab", tab);
         session.setAttribute("userId", "518974");
         session.setAttribute("userName", "yao");
         return "index";
@@ -122,16 +123,18 @@ public class ActivitiController {
         //return "redirect:/index";
     }
 
+    @ResponseBody
     @PostMapping("/transfer/{taskId}")
-    public String transfer(@PathVariable("taskId") String taskId, @RequestParam String repairer, @RequestParam String comment) {
+    public String transfer(@PathVariable("taskId") String taskId, @RequestParam String repairer,
+                           @RequestParam String comment, HttpSession session) {
 
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
-        //task.setAssignee(repairer);
+        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute("userName")));
         taskService.setAssignee(taskId, repairer);
         taskService.addComment(taskId, processInstanceId, comment);
 
-        return "redirect:/index";
+        return "success";
     }
 
     @GetMapping("/repairForm/{processDefinitionId}/{userId}")

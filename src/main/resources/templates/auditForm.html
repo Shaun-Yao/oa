@@ -6,6 +6,7 @@
     <title>repair form</title>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/webjars/bootbox/4.4.0/bootbox.js"></script>
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 
 </head>
@@ -14,8 +15,12 @@
     <div class="panel-heading">
         <h3 class="panel-title">物品维修申请</h3>
     </div>
+    <div class="alert alert-danger collapse" id="validateAlert">
+        <a class="close" onclick="$('.alert').hide()">×</a>
+        <strong>请选择要分派的电工！</strong>
+    </div>
     <div class="panel-body">
-        <form role="form" th:action="@{/complete/} + ${taskId}" method="post">
+        <form role="form" id="repairForm" th:action="@{/complete/} + ${taskId}" method="post">
             <div th:utext="${renderedStartForm}" />
         </form>
         <div class="panel panel-default invisible" id="comments">
@@ -25,12 +30,17 @@
             </table>
         </div>
     </div>
+
 </div>
 </body>
 <script th:inline="javascript">
 
+    // $("#$('#passwordsNoMatchRegister').show();").fadeTo(2000, 500).slideUp(500, function(){
+    //     $("#validate-alert").slideUp(500);
+    // });
+
     function goBack() {
-        window.history.back();
+        window.location.href='/index?tab=todo';
     }
 
     $(function(){
@@ -46,44 +56,80 @@
                 $('#comments > table').append(comment);
             }
         }
+
+        //$("#transferId").empty();
+        $("#transferId").append("<option value='518974'>518974</option>");
+
     });
-/*
 
-    $('#submit').click(function () {
+    $('#submitBtn').click(function() {
+        if($('#repairForm')[0].reportValidity()) {
+            bootbox.confirm("确认提交？", function(result){
+                if(result) {
+                    $('#repairForm').submit();
+                }
+            });
+        }
+    })
 
-        $.ajax({
-            type: "POST",
-            //async:false,
-            url: "/complete/" + $('#taskId').val(),
-            data: {
+    $('#transfer').click(function(){
 
-                "comment": $('#comment').val()
-            },
-            dataType: "json",
-            success: function(data){
-                document.location.href='/index';
+        if($('#repairForm')[0].reportValidity()) {
+
+            if($("#transferId").val() == "") {
+                $('#validateAlert').show();
+                return;
             }
-        });
+
+            var transferedName = $("#transferId option:selected").text();
+            bootbox.confirm("确认分派给 " + transferedName + " 维修申请？", function(result){
+                if(result) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/transfer/" + [[${taskId}]],
+                        data: {
+                            "repairer": $("#transferId").val(),
+                            "comment": $('#comment').val()
+                        },
+                        //dataType: "json",
+                        success: function(data){
+                            window.location.href='/index?tab=todo';
+                        }
+                    });
+                }
+            });
+        }
+        //event.preventDefault();
+        //return false;
+        //$('#confirmModal').modal('show');
+
     });
-*/
+
+
 
     $('#finish').click(function () {
 
-        $.ajax({
-            type: "POST",
-            async: false,
-            url: "/finish/" + $('#taskId').val(),
-            data: {
-                "id": $('#id').val(),
-                "score": $('#score').val(),
-                "comment": $('#comment').val()
-            },
-            dataType: "json",
-            success: function(data){
-                console.log(2323);
-                window.location.href='/index';
-            }
-        });
+        if($('#repairForm')[0].reportValidity()) {
+            bootbox.confirm("确认提交？", function(result){
+                if(result) {
+                    $.ajax({
+                        type: "POST",
+                        //async: false,
+                        url: "/finish/" + $('#taskId').val(),
+                        data: {
+                            "id": $('#id').val(),
+                            "score": $('#score').val(),
+                            "comment": $('#comment').val()
+                        },
+                        //dataType: "json",
+                        success: function(data){
+                            window.location.href='/index?tab=todo';
+                        }
+                    });
+                }
+            });
+        }
+
     });
 
 </script>

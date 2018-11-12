@@ -6,6 +6,7 @@
     <title>repair form</title>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/webjars/bootbox/4.4.0/bootbox.js"></script>
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 </head>
 <body>
@@ -14,7 +15,7 @@
         <h3 class="panel-title">物品维修申请</h3>
     </div>
     <div class="panel-body">
-        <form role="form" th:action="@{/apply}" method="post">
+        <form role="form" id="repairForm" th:action="@{/apply}" method="post">
 
             <input type="hidden" name="applicantId" id="applicantId" th:value="${session.userId}"/>
             <input type="hidden" name="applicant" id="applicant" th:value="${applicant}"/>
@@ -43,7 +44,7 @@
             </div>
 
             <div class="col-md-4 text-center">
-                <button type="submit" class="btn btn-primary btn-lg">提交</button>
+                <button type="button" class="btn btn-primary btn-lg" id="submitBtn">提交</button>
                 <button type="button" onclick="goBack()" class="btn btn-info btn-lg">返回</button>
             </div>
         </form>
@@ -55,5 +56,22 @@
     function goBack() {
         window.history.back();
     }
+
+
+    $(function(){
+        $('#submitBtn').click(function() {
+            if($('#repairForm')[0].reportValidity()) {
+                //event.preventDefault();
+                bootbox.confirm("确认提交维修申请？", function(result){
+                    if(result) {
+                        $('#repairForm').submit();
+                    }
+                });
+            }
+
+        })
+
+    });
+
 </script>
 </html>

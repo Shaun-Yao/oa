@@ -99,6 +99,12 @@
             <artifactId>formvalidation.io</artifactId>
             <version>0.0.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootbox</artifactId>
+            <version>4.4.0</version>
+        </dependency>
     </dependencies>
 
     <build>

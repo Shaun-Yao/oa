@@ -20,10 +20,10 @@
         </a>
     </li>
     <li>
-        <a href="#second" data-toggle="tab" id="myApplications">我的申请</a>
+        <a href="#mine" data-toggle="tab" id="myApplications">我的申请</a>
     </li>
     <li>
-        <a href="#third" data-toggle="tab" id="todoList">待我审批</a>
+        <a href="#todo" data-toggle="tab" id="todoList">待我审批</a>
     </li>
 
 </ul>
@@ -35,7 +35,7 @@
         </ul>
 
     </div>
-    <div class="tab-pane fade" id="second">
+    <div class="tab-pane fade" id="mine">
         <div class="table-responsive">
             <table class="table" id="applyTable">
 
@@ -52,7 +52,7 @@
             </table>
         </div>
     </div>
-    <div class="tab-pane fade" id="third">
+    <div class="tab-pane fade" id="todo">
      <div class="table-responsive">
          <table class="table" id="todoTable">
 
@@ -74,17 +74,21 @@
 </div>
 </body>
 
-<script>
+<script th:inline="javascript">
     $(function(){
 
-        $(".tablea").find(".box:first").show();    //为每个BOX的第一个元素显示
-        $("#oranger a").on("click",function(){ //给a标签添加事件
-            var index=$(this).index();  //获取当前a标签的个数
-            $(this).parent().next().find(".box").hide().eq(index).show(); //返回上一层，在下面查找css名为box隐藏，然后选中的显示
-            $(this).addClass("hover").siblings().removeClass("hover"); //a标签显示，同辈元素隐藏
-        });
+        //var tab = [[${tab}]];
+        switch ([[${tab}]]) {
+            case "mine":
+                $('#myTab a[href="#mine"]').tab('show');
+                break;
+            case "todo":
+                $('#myTab a[href="#todo"]').tab('show');
+                break;
+            default:
+        }
 
-        $("#myApplications").click(function () {
+        $('a[href="#mine"]').on('shown.bs.tab', function (e) {
             $("#applyTable tbody").empty();
             $.ajax({
                 type: "GET",
@@ -105,7 +109,7 @@
             });
         });
 
-        $("#todoList").click(function () {
+        $('a[href="#todo"]').on('shown.bs.tab', function (e) {
             $("#todoTable tbody").empty();
             $.ajax({
                 type: "GET",
@@ -124,6 +128,31 @@
                 }
             });
         });
+
+        /*$("#myApplications").click(function () {
+            $("#applyTable tbody").empty();
+            $.ajax({
+                type: "GET",
+                url: "/datas/myApplications/518974",
+                //data: "name=garfield&age=18",
+                dataType: "json",
+                success: function(data){
+                    var content = data.content;
+                    for(var i = 0; i < content.length; i++){
+                        var rowTem = '<tr>'
+                            + '<td>' + content[i].createdTime + '</td>'
+                            + '<td><a href="/toView/' + content[i].id + '">' + content[i].deviceName + '</a></td>'
+                            + '<td>' + content[i].status + '</td>'
+                            + '</tr>';
+                        $("#applyTable tbody:last").append(rowTem);
+                    }
+                }
+            });
+        });*/
+
+        /*$("#todoList").click(function () {
+            window.location.href='/index?tab=todo';
+        });*/
     })
 </script>
 <style type="text/css">
