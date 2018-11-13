@@ -4,6 +4,7 @@ import com.honji.oa.config.OaConstants;
 import com.honji.oa.domain.Repair;
 import com.honji.oa.enums.ProcessStatus;
 import com.honji.oa.repository.RepairRepository;
+import com.honji.oa.utils.JsonUtils;
 import org.activiti.engine.*;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
@@ -56,7 +57,6 @@ public class RepairService {
     //TODO 事务有问题 可能需要implement RepairService
     @Transactional
     public void apply(Repair repair) {
-        System.out.println("applicat==" + repair.getApplicantId().equals(""));
         repairRepository.save(repair);
         final String id = repair.getId().toString();
 
@@ -67,17 +67,19 @@ public class RepairService {
         final int deviceType = repair.getDeviceType();
         variables.put("deviceType", deviceType);
         if(deviceType == 0) {
-            variables.put("handler", "518974");
+            variables.put("repairer", "518974");
         } else if(deviceType == 1) {
-            variables.put("handler", "518974");
+            variables.put("hr_manager", "518974");
         }
-
+        System.out.println(JsonUtils.toJson(variables));
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
         Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         String taskId = task.getId();
         Map<String, String> formData = new HashMap();
         formData.put("id", String.valueOf(repair.getId()));
         formData.put("taskId", taskId);
+        formData.put("applicantId", repair.getApplicantId());
+        formData.put("applicant", repair.getApplicant());
         formData.put("deviceName", repair.getDeviceName());
         formData.put("deviceType", String.valueOf(repair.getDeviceType()));
         formData.put("description", repair.getDescription());

@@ -6,6 +6,7 @@ import com.honji.oa.service.RepairService;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
+import me.chanjar.weixin.cp.bean.WxCpUser;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 import org.activiti.engine.*;
 import org.activiti.engine.form.FormProperty;
@@ -15,6 +16,7 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -52,17 +54,29 @@ public class ActivitiController {
     private WxCpService wxService;
 
 
-    @GetMapping("/auth")
-    public String auth(@RequestParam String code, Model model) throws WxErrorException {
-        //String code = request.getParameter("code");
-        //WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
-        String[] res =  wxService.getOauth2Service().getUserInfo(code);
-        //String userId = res[0];
+    @GetMapping("/index")
+    public String index(@RequestParam String code, @RequestParam(required = false) String tab,
+                        HttpSession session, Model model) throws WxErrorException {
+        if(!StringUtils.isBlank(code)) {//code非空则是微信网页登录跳转过来的
+            String[] res =  wxService.getOauth2Service().getUserInfo(code);
+            final String userId = res[0];
+            WxCpUser wxCpUser = wxService.getUserService().getById(userId);
+            //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
+            final String userName = wxCpUser.getEnglishName();
+//        Integer[] departIds = wxCpUser.getDepartIds();
+//        List<WxCpDepart> departs = wxService.getDepartmentService().list(departIds[0]);
+//        System.out.println(JsonUtils.toJson(departs));
+            session.setAttribute("userId", userId);
+            session.setAttribute("userName", userName);
+        }
 
-        model.addAttribute("applicantId", res[0]);
-
+//        if(session.getAttribute("userId") != null) {
+//            wxService.getOauth2Service().buildAuthorizationUrl();
+//        }
+        model.addAttribute("tab", tab);
         return "index";
     }
+/*
 
     @GetMapping("/index")
     public String index(@RequestParam(required = false) String tab, Model model, HttpSession session) {
@@ -71,6 +85,7 @@ public class ActivitiController {
         session.setAttribute("userName", "yao");
         return "index";
     }
+*/
 
     @GetMapping("/toApply")
     public String toApply(Model model) throws WxErrorException {
@@ -79,7 +94,7 @@ public class ActivitiController {
         //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
         //String name = wxCpUser.getEnglishName();
         //model.addAttribute("processDefinitionId", processDefinitionId);
-        model.addAttribute("applicant", "yao");
+        //model.addAttribute("applicant", "yao");
 
         return "applyForm";
     }
@@ -98,9 +113,29 @@ public class ActivitiController {
      */
     //@ResponseBody
     @PostMapping("/complete/{taskId}")
-    public String complete(@PathVariable("taskId") String taskId, @RequestParam String comment, HttpSession session) {
+    public String complete(@PathVariable String taskId, @RequestParam String comment,
+                           @RequestParam String handler, HttpSession session) {
         Map<String, Object> variables = new HashMap();
-        variables.put("handler", "518974");
+        final String hrManager = "hr_manager";
+        final String repairer = "repairer";
+        final String applicant = "applicant";
+        switch (handler) {
+            case hrManager:
+                variables.put(hrManager, "518974");
+                break;
+            case repairer:
+                variables.put(repairer, "518974");
+                break;
+            case applicant:
+                variables.put(applicant, "518974");
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
+        //variables.put("handler", "518974");
+        //Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+
         //添加备注前需要先设置当前用户名作为备注的userId
         identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute("userName")));
         repairService.complete(taskId, comment, variables);

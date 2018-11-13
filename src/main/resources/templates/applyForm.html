@@ -18,7 +18,7 @@
         <form role="form" id="repairForm" th:action="@{/apply}" method="post">
 
             <input type="hidden" name="applicantId" id="applicantId" th:value="${session.userId}"/>
-            <input type="hidden" name="applicant" id="applicant" th:value="${applicant}"/>
+            <input type="hidden" name="applicant" id="applicant" th:value="${session.userName}"/>
 
             <div class="form-group">
                 <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
