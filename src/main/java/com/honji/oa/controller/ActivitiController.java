@@ -55,7 +55,7 @@ public class ActivitiController {
 
 
     @GetMapping("/index")
-    public String index(@RequestParam String code, @RequestParam(required = false) String tab,
+    public String index(@RequestParam(required = false) String code, @RequestParam(required = false) String tab,
                         HttpSession session, Model model) throws WxErrorException {
         if(!StringUtils.isBlank(code)) {//code非空则是微信网页登录跳转过来的
             String[] res =  wxService.getOauth2Service().getUserInfo(code);
@@ -76,25 +76,10 @@ public class ActivitiController {
         model.addAttribute("tab", tab);
         return "index";
     }
-/*
 
-    @GetMapping("/index")
-    public String index(@RequestParam(required = false) String tab, Model model, HttpSession session) {
-        model.addAttribute("tab", tab);
-        session.setAttribute("userId", "518974");
-        session.setAttribute("userName", "yao");
-        return "index";
-    }
-*/
 
     @GetMapping("/toApply")
     public String toApply(Model model) throws WxErrorException {
-
-        //WxCpUser wxCpUser = wxService.getUserService().getById(applicantId);
-        //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
-        //String name = wxCpUser.getEnglishName();
-        //model.addAttribute("processDefinitionId", processDefinitionId);
-        //model.addAttribute("applicant", "yao");
 
         return "applyForm";
     }
@@ -114,31 +99,9 @@ public class ActivitiController {
     //@ResponseBody
     @PostMapping("/complete/{taskId}")
     public String complete(@PathVariable String taskId, @RequestParam String comment,
-                           @RequestParam String handler, HttpSession session) {
-        Map<String, Object> variables = new HashMap();
-        final String hrManager = "hr_manager";
-        final String repairer = "repairer";
-        final String applicant = "applicant";
-        switch (handler) {
-            case hrManager:
-                variables.put(hrManager, "518974");
-                break;
-            case repairer:
-                variables.put(repairer, "518974");
-                break;
-            case applicant:
-                variables.put(applicant, "518974");
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
+                           @RequestParam String handler) {
 
-        //variables.put("handler", "518974");
-        //Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-
-        //添加备注前需要先设置当前用户名作为备注的userId
-        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute("userName")));
-        repairService.complete(taskId, comment, variables);
+        repairService.complete(taskId, comment, handler);
         return "redirect:/index";
     }
 

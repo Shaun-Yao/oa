@@ -1,6 +1,7 @@
 package com.honji.oa.config;
 
 import me.chanjar.weixin.cp.api.WxCpService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -21,12 +22,19 @@ public class SessionTimeoutInterceptor extends HandlerInterceptorAdapter {
                              HttpServletResponse response, Object handler) throws IOException {
 
         HttpSession session = request.getSession();
-        Object userName = session.getAttribute("userName");
-        if (userName == null) {
-            String authUrl = wxService.getOauth2Service().buildAuthorizationUrl("153ebb9c.ngrok.io", "STATE", "snsapi_userinfo");
-            request.setAttribute("authUrl", authUrl);
-            response.sendRedirect(request.getContextPath()+"/templates/timeout.html");
+        String code = request.getParameter("code");
+        if (StringUtils.isNotEmpty(code)) {//有code参数表示微信网页登录授权回调，直接放行
+            return true;
+        }
 
+        Object userName = session.getAttribute("userName");
+        if (userName == null) {//session过期需要重新使用微信网页登录授权
+            String rootPath = request.getRequestURL().substring(0,
+                    request.getRequestURL().length() - request.getRequestURI().length());
+            String indexPath = rootPath.concat("/index");
+            String authUrl = wxService.getOauth2Service().buildAuthorizationUrl(indexPath, "STATE", "snsapi_userinfo");
+            response.sendRedirect(authUrl);
+            return false;
         }
         return true;
     }

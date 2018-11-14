@@ -17,61 +17,66 @@
     <div class="panel-body">
         <form role="form" id="repairForm" th:action="@{/apply}" method="post">
 
+
             <input type="hidden" name="applicantId" id="applicantId" th:value="${session.userId}"/>
             <input type="hidden" name="applicant" id="applicant" th:value="${session.userName}"/>
 
-            <div class="form-group">
-                <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-                <input type="text" class="form-control" name="deviceName" id="deviceName" required="required" />
-            </div>
+            <!--
+                        <input type="hidden" name="applicantId" id="applicantId" th:value="518974"/>
+                        <input type="hidden" name="applicant" id="applicant" th:value="yao"/>
+-->
+                        <div class="form-group">
+                            <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
+                            <input type="text" class="form-control" name="deviceName" id="deviceName" required="required" />
+                        </div>
 
-            <div class="form-group">
+                        <div class="form-group">
 
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="deviceType" id="optionsRadios1" value="0" checked>小件物品
-                    </label>
-                    <label>
-                        <input type="radio" name="deviceType" id="optionsRadios2" value="1">大件物品
-                    </label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="deviceType" id="optionsRadios1" value="0" checked>小件物品
+                                </label>
+                                <label>
+                                    <input type="radio" name="deviceType" id="optionsRadios2" value="1">大件物品
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="col-sm-2 control-label">故障描述</label>
+                            <textarea class="form-control" name="description" id="description" rows="3" required="required"></textarea>
+                        </div>
+
+                        <div class="col-md-4 text-center">
+                            <button type="button" class="btn btn-primary btn-lg" id="submitBtn">提交</button>
+                            <button type="button" onclick="goBack()" class="btn btn-info btn-lg">返回</button>
+                        </div>
+                    </form>
                 </div>
 
             </div>
-
-            <div class="form-group">
-                <label for="description" class="col-sm-2 control-label">故障描述</label>
-                <textarea class="form-control" name="description" id="description" rows="3" required="required"></textarea>
-            </div>
-
-            <div class="col-md-4 text-center">
-                <button type="button" class="btn btn-primary btn-lg" id="submitBtn">提交</button>
-                <button type="button" onclick="goBack()" class="btn btn-info btn-lg">返回</button>
-            </div>
-        </form>
-    </div>
-
-</div>
-</body>
-<script>
-    function goBack() {
-        window.history.back();
-    }
+            </body>
+            <script>
+                function goBack() {
+                    window.location.href='/index';
+                }
 
 
-    $(function(){
-        $('#submitBtn').click(function() {
-            if($('#repairForm')[0].reportValidity()) {
-                //event.preventDefault();
-                bootbox.confirm("确认提交维修申请？", function(result){
-                    if(result) {
-                        $('#repairForm').submit();
-                    }
+                $(function(){
+                    $('#submitBtn').click(function() {
+                        if($('#repairForm')[0].reportValidity()) {
+                            //event.preventDefault();
+                            bootbox.confirm("确认提交维修申请？", function(result){
+                                if(result) {
+                                    $('#repairForm').submit();
+                                }
+                            });
+                        }
+
+                    })
+
                 });
-            }
 
-        })
-
-    });
-
-</script>
-</html>
+            </script>
+            </html>
