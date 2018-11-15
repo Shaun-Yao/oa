@@ -121,7 +121,7 @@
                         var rowTem = '<tr>'
                             + '<td>' + content[i].createdTime + '</td>'
                             + '<td>' + content[i].applicant + '</td>'
-                            + '<td><a href="/toAudit/' + content[i].id + '">' + content[i].deviceName + '</a></td>'
+                            + '<td><a href="/toAudit/' + content[i].id +'/' + content[i].taskId + '">' + content[i].deviceName + '</a></td>'
                             + '</tr>';
                         $("#todoTable tbody:last").append(rowTem);
                     }

@@ -4,7 +4,6 @@ import com.honji.oa.enums.ProcessStatus;
 import lombok.Data;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.task.Task;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -85,7 +84,7 @@ public class Repair implements Serializable {
 
     // 流程任务
     @Transient
-    private Task task;
+    private String taskId;
 
     //private Map<String, Object> variables;
 

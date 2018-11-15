@@ -54,6 +54,31 @@ public class ActivitiController {
     private WxCpService wxService;
 
 
+/*
+
+    @GetMapping("/auth")
+    public String auth(@RequestParam String code,
+                        HttpSession session, HttpServletRequest request) throws WxErrorException {
+        String[] res =  wxService.getOauth2Service().getUserInfo(code);
+        final String userId = res[0];
+        WxCpUser wxCpUser = wxService.getUserService().getById(userId);
+        //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
+        final String userName = wxCpUser.getEnglishName();
+        session.setAttribute("userId", userId);
+        session.setAttribute("userName", userName);
+
+        return "forward:".concat(request.getRequestURI());
+    }
+
+    @GetMapping("/index")
+    public String index(@RequestParam(required = false) String tab, Model model){
+        model.addAttribute("tab", tab);
+        return "index";
+    }
+*/
+
+
+
     @GetMapping("/index")
     public String index(@RequestParam(required = false) String code, @RequestParam(required = false) String tab,
                         HttpSession session, Model model) throws WxErrorException {
@@ -76,6 +101,7 @@ public class ActivitiController {
         model.addAttribute("tab", tab);
         return "index";
     }
+
 
 
     @GetMapping("/toApply")
@@ -123,16 +149,10 @@ public class ActivitiController {
 
     @ResponseBody
     @PostMapping("/transfer/{taskId}")
-    public String transfer(@PathVariable("taskId") String taskId, @RequestParam String repairer,
-                           @RequestParam String comment, HttpSession session) {
+    public void transfer(@PathVariable("taskId") String taskId, @RequestParam String repairer,
+                           @RequestParam String comment) {
 
-        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-        String processInstanceId = task.getProcessInstanceId();
-        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute("userName")));
-        taskService.setAssignee(taskId, repairer);
-        taskService.addComment(taskId, processInstanceId, comment);
-
-        return "success";
+       repairService.transfer(taskId, comment, repairer);
     }
 
     @GetMapping("/repairForm/{processDefinitionId}/{userId}")
@@ -186,6 +206,7 @@ public class ActivitiController {
         return "todoList";
     }
 
+
     @GetMapping("/toView/{id}")
     public String toView(@PathVariable("id") Long id, Model model) {
         Repair repair = repairService.findById(id);
@@ -195,7 +216,6 @@ public class ActivitiController {
         if(processInstance == null) {
             HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
             processInstanceId = hpi.getId();
-
         } else {
             processInstanceId = processInstance.getId();
         }
@@ -208,13 +228,24 @@ public class ActivitiController {
     }
 
 
-    @GetMapping("/toAudit/{id}")
-    public String toAudit(@PathVariable Long id, Model model) {
+    @GetMapping("/toAudit/{id}/{taskId}")
+    public String toAudit(@PathVariable Long id, @PathVariable String taskId, @RequestParam(required = false) String code,
+                          HttpSession session, Model model) {
+
+        this.initSession(code, session);
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task == null) {// 任务已经结束返回查看界面
+            return "redirect:/toView/".concat(id.toString());
+        }
+
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
+
+        //String id = processInstance.getBusinessKey().split("-")[1];
         Repair repair = repairService.findById(id);
-        String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
-        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
-        Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
-        final String taskId = task.getId();
+        //String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
+        //ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
+        //Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
+        //final String taskId = task.getId();
         List<Comment> comments = taskService.getProcessInstanceComments(processInstance.getId());
 
         Object renderedStartForm = formService.getRenderedTaskForm(taskId);
@@ -225,6 +256,25 @@ public class ActivitiController {
         return "auditForm";
     }
 
+    private void initSession(String code, HttpSession session)  {
+        if(!StringUtils.isBlank(code)) {//code非空则是微信网页登录跳转过来的
+            System.out.println("initSession=====");
+            try {
+                String[] res = wxService.getOauth2Service().getUserInfo(code);
+                final String userId = res[0];
+                WxCpUser wxCpUser = wxService.getUserService().getById(userId);
+                //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
+                final String userName = wxCpUser.getEnglishName();
+//        Integer[] departIds = wxCpUser.getDepartIds();
+//        List<WxCpDepart> departs = wxService.getDepartmentService().list(departIds[0]);
+//        System.out.println(JsonUtils.toJson(departs));
+                session.setAttribute("userId", userId);
+                session.setAttribute("userName", userName);
+            } catch (WxErrorException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @GetMapping("/viewForm/{taskId}")
     public String viewForm(@PathVariable String taskId, Model model) {

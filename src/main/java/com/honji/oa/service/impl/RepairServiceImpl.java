@@ -1,28 +1,8 @@
 package com.honji.oa.service.impl;
 
-import com.honji.oa.config.OaConstants;
-import com.honji.oa.domain.Repair;
-import com.honji.oa.enums.ProcessStatus;
-import com.honji.oa.repository.RepairRepository;
-import com.honji.oa.service.RepairService;
-import org.activiti.engine.*;
-import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.task.Task;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-@Service
-public class RepairServiceImpl implements RepairService {
+//@Service
+public class RepairServiceImpl /*implements RepairService*/ {
+/*
 
 
     @Autowired
@@ -47,6 +27,8 @@ public class RepairServiceImpl implements RepairService {
     @Autowired
     private FormService formService;
 
+    @Autowired
+    private WxCpService wxService;
 
 
     @Override
@@ -69,10 +51,13 @@ public class RepairServiceImpl implements RepairService {
         Map<String, Object> variables = new HashMap();
         final int deviceType = repair.getDeviceType();
         variables.put("deviceType", deviceType);
+        String handler = null;
         if(deviceType == 0) {
-            variables.put("repairer", "518974");
+            handler = "518974";//TODO
+            variables.put("repairer", handler);
         } else if(deviceType == 1) {
-            variables.put("hr_manager", "518974");
+            handler = "518974";//TODO
+            variables.put("hr_manager", handler);
         }
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
         Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
@@ -87,6 +72,14 @@ public class RepairServiceImpl implements RepairService {
         formData.put("description", repair.getDescription());
         formData.put("createdTime", repair.getCreatedTime().toString());
         formService.saveFormData(taskId, formData);
+
+        WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
+        WxCpMessage message = WxCpMessage.TEXTCARD().agentId(configStorage.getAgentId())
+                .toUser(handler).title("有新的流程待办事项")
+                .description("流程待办事项描述。。。")
+                .url("http://f32597fb.ngrok.io/toAudit/".concat(task.getId()))
+                .build();
+        wxService.messageSend(message);
     }
 
 
@@ -118,7 +111,8 @@ public class RepairServiceImpl implements RepairService {
 
     @Override
     public Page<Repair> findMyApplications(String userId, int page, int size) {
-       /* final int offset = page * size;
+       */
+/* final int offset = page * size;
         long total = historyService.createHistoricProcessInstanceQuery().startedBy(userId).count();
 //        List<HistoricProcessInstance> processInstances = historyService.createHistoricProcessInstanceQuery()
 //                .startedBy(userId).orderByProcessInstanceId().desc().listPage(offset, size);
@@ -136,7 +130,8 @@ public class RepairServiceImpl implements RepairService {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Repair> repairPage = new PageImpl<>(repairs, pageable, total);*/
+        Page<Repair> repairPage = new PageImpl<>(repairs, pageable, total);*//*
+
         Pageable pageable = PageRequest.of(page, size);
         Page<Repair> repairPage = repairRepository.findByApplicantIdOrderByCreatedTimeDesc(userId, pageable);
         return repairPage;
@@ -193,4 +188,6 @@ public class RepairServiceImpl implements RepairService {
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId);
     }
+*/
+
 }
