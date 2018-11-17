@@ -3,6 +3,7 @@ package com.honji.oa.controller;
 import com.honji.oa.config.OaConstants;
 import com.honji.oa.domain.Repair;
 import com.honji.oa.service.RepairService;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
@@ -25,10 +26,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Controller
 public class ActivitiController {
 
@@ -241,16 +244,34 @@ public class ActivitiController {
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
 
         //String id = processInstance.getBusinessKey().split("-")[1];
-        Repair repair = repairService.findById(id);
+        //Repair repair = repairService.findById(id);
         //String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
         //ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
         //Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         //final String taskId = task.getId();
         List<Comment> comments = taskService.getProcessInstanceComments(processInstance.getId());
-
         Object renderedStartForm = formService.getRenderedTaskForm(taskId);
+        List<WxCpUser> users = new ArrayList<>();
+        try {
+            List<WxCpUser> repairers = wxService.getTagService().listUsersByTagId("1");
+            //WxCpUser user = wxService.getUserService().getById(repairers.get(0).getUserId());
+            //listUsersByTagId获取到的实体没englishName字段，所以要重新获取一遍
+            for(WxCpUser repairer : repairers) {
+                WxCpUser user = wxService.getUserService().getById(repairer.getUserId());
+                //排除本人
+                if(!repairer.getUserId().equals(session.getAttribute("userId"))) {
+                    users.add(user);
+                }
+            }
+        } catch (WxErrorException e) {
+            log.error("获取电工标签成员出错", e);
+            e.printStackTrace();
+        }
+
+
         model.addAttribute("renderedStartForm", renderedStartForm);
-        model.addAttribute("repair", repair);
+        //model.addAttribute("repair", repair);
+        model.addAttribute("repairers", users);
         model.addAttribute("taskId", taskId);
         model.addAttribute("comments", comments);
         return "auditForm";

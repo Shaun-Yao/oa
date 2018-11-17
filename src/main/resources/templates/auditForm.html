@@ -57,8 +57,13 @@
             }
         }
 
+        /*[# th:each="repairer : ${repairers}"]*/
+            $("#transferId").append("<option value='" + [[${repairer.userId}]]
+                + "'>" + [[${repairer.englishName}]] + "</option>");
+        /*[/]*/
+
         //$("#transferId").empty();
-        $("#transferId").append("<option value='518974'>518974</option>");
+
 
     });
 

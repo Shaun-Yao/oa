@@ -4,9 +4,11 @@ import com.honji.oa.config.OaConstants;
 import com.honji.oa.domain.Repair;
 import com.honji.oa.enums.ProcessStatus;
 import com.honji.oa.repository.RepairRepository;
+import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
+import me.chanjar.weixin.cp.bean.WxCpUser;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 import org.activiti.engine.*;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class RepairService {
 
@@ -74,13 +77,11 @@ public class RepairService {
     
     public Repair findById(Long id) {
         return repairRepository.findById(id).get();
-//        return repairRepository.findOne(id);
     }
 
 
-    //TODO 事务有问题 可能需要implement RepairService
+    //TODO 事务有问题
     @Transactional(rollbackFor = Exception.class)
-    
     public void apply(Repair repair) {
         repairRepository.save(repair);
         final String id = repair.getId().toString();
@@ -92,12 +93,18 @@ public class RepairService {
         final int deviceType = repair.getDeviceType();
         variables.put("deviceType", deviceType);
         String handler = null;
-        if(deviceType == 0) {
-            handler = "518645";//TODO
-            variables.put("repairer", handler);
-        } else if(deviceType == 1) {
-            handler = "518974";//TODO
-            variables.put("hr_manager", handler);
+        try {
+            if(deviceType == 0) {
+                List<WxCpUser> repairers = wxService.getTagService().listUsersByTagId("1");
+                handler = repairers.get(2).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                variables.put("repairer", handler);
+            } else if(deviceType == 1) {
+                List<WxCpUser> repairers = wxService.getTagService().listUsersByTagId("2");
+                handler = repairers.get(0).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                variables.put("hr_manager", handler);
+            }
+        } catch (WxErrorException e) {
+            e.printStackTrace();
         }
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
         Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
@@ -170,8 +177,7 @@ public class RepairService {
         return repairPage;
     }
 
-    @Transactional
-    
+    @Transactional(rollbackFor = Exception.class)
     public void complete(String taskId, String comment, String handlerRole) {
 
         Map<String, Object> variables = new HashMap();
@@ -216,7 +222,7 @@ public class RepairService {
         this.sendMsg(handler, repair, nextTaskId);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void transfer(String taskId, String comment, String repairer) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
@@ -233,6 +239,7 @@ public class RepairService {
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     public void finish(String taskId, String comment, Repair repair) {
         Repair dbRepair = repairRepository.getOne(repair.getId());
         dbRepair.setScore(repair.getScore());
@@ -259,7 +266,7 @@ public class RepairService {
         try {
             wxService.messageSend(message);
         } catch (WxErrorException e) {
-            //TODO 考虑回滚
+            log.error("发送消息通知失败", e);
             e.printStackTrace();
         }
     }
