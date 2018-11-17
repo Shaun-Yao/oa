@@ -92,7 +92,7 @@
             $("#applyTable tbody").empty();
             $.ajax({
                 type: "GET",
-                url: "/datas/myApplications/518974",
+                url: "/datas/myApplications/" + [[${session.userId}]],
                 //data: "name=garfield&age=18",
                 dataType: "json",
                 success: function(data){
@@ -113,7 +113,7 @@
             $("#todoTable tbody").empty();
             $.ajax({
                 type: "GET",
-                url: "/datas/todoList/518974",
+                url: "/datas/todoList/" + [[${session.userId}]],
                 dataType: "json",
                 success: function(data){
                     var content = data.content;

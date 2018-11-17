@@ -19,7 +19,7 @@ public class OaApplication implements CommandLineRunner {
 //
 //
 //    @Autowired
-//    private HikariDataSource dataSource;
+//    private DataSource dataSource;
 
     public static void main(String[] args) {
         SpringApplication.run(OaApplication.class, args);
@@ -40,6 +40,7 @@ public class OaApplication implements CommandLineRunner {
 
     @Bean
     public SpringProcessEngineConfiguration processEngineConfiguration() {
+        log.info("datasource={}", dataSource);
         SpringProcessEngineConfiguration config = new SpringProcessEngineConfiguration();
         config.setDataSource(dataSource);
         config.setTransactionManager(transactionManager);
@@ -55,6 +56,7 @@ public class OaApplication implements CommandLineRunner {
         factoryBean.setProcessEngineConfiguration(processEngineConfiguration());
         return factoryBean;
     }
+
 */
 
 

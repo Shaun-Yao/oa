@@ -99,8 +99,8 @@ public class RepairService {
                 handler = repairers.get(2).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
                 variables.put("repairer", handler);
             } else if(deviceType == 1) {
-                List<WxCpUser> repairers = wxService.getTagService().listUsersByTagId("2");
-                handler = repairers.get(0).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                List<WxCpUser> managers = wxService.getTagService().listUsersByTagId("2");
+                handler = managers.get(0).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
                 variables.put("hr_manager", handler);
             }
         } catch (WxErrorException e) {
@@ -184,26 +184,40 @@ public class RepairService {
         final String hrManager = "hr_manager";
         final String repairer = "repairer";
         final String applicant = "applicant";
-        String handler = "518974";
-        switch (handlerRole) {
-            case hrManager:
-                variables.put(hrManager, handler);
-                break;
-            case repairer:
-                variables.put(repairer, handler);
-                break;
-            case applicant:
-                variables.put(applicant, handler);
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
-
+        String handler = null;
         //添加备注前需要先设置当前用户名作为备注的userId
         identityService.setAuthenticatedUserId(String.valueOf(request.getSession().getAttribute("userName")));
-
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
+
+
+        try {
+            switch (handlerRole) {
+                case hrManager:
+                    List<WxCpUser> repairers = wxService.getTagService().listUsersByTagId("1");
+                    handler = repairers.get(2).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                    variables.put(hrManager, handler);
+                    break;
+                case repairer:
+                    List<WxCpUser> managers = wxService.getTagService().listUsersByTagId("2");
+                    handler = managers.get(0).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                    variables.put(repairer, handler);
+                    break;
+                case applicant:
+                    ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                            .processInstanceId(processInstanceId).singleResult();
+                    String id = processInstance.getBusinessKey().split("-")[1];
+                    Repair repair = repairRepository.getOne(Long.valueOf(id));
+                    variables.put(applicant, repair.getApplicantId());
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
+        } catch (WxErrorException e) {
+            e.printStackTrace();
+        }
+
+
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId, variables);
 
