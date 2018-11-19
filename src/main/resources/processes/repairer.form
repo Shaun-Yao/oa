@@ -1,6 +1,5 @@
 <input type="hidden" class="form-control" name="id" id="id" value="${id}" />
 <input type="hidden" class="form-control" name="taskId" id="taskId" value="${taskId}" />
-<input type="hidden" class="form-control" name="handler" value="applicant" />
 
   <div class="form-group">
       <label for="createdTime" class="col-sm-2 control-label">申请时间</label>
@@ -10,6 +9,16 @@
   <div class="form-group">
       <label for="applicant" class="col-sm-2 control-label">申请人</label>
       <input type="text" class="form-control" readonly name="applicant" id="applicant" value="${applicant}" />
+  </div>
+
+  <div class="form-group">
+      <label class="col-sm-2 control-label">申请人部门</label>
+      <input type="text" class="form-control" readonly value="${applicantDepart}" />
+  </div>
+
+  <div class="form-group">
+      <label class="col-sm-2 control-label">申请人手机号码</label>
+      <input type="text" class="form-control" readonly value="${applicantMobile}" />
   </div>
 
   <div class="form-group">

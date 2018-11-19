@@ -6,6 +6,7 @@ import com.honji.oa.service.RepairService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.cp.api.WxCpService;
+import me.chanjar.weixin.cp.bean.WxCpDepart;
 import me.chanjar.weixin.cp.bean.WxCpMessage;
 import me.chanjar.weixin.cp.bean.WxCpUser;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
@@ -56,7 +57,8 @@ public class ActivitiController {
     @Autowired
     private WxCpService wxService;
 
-
+    @Autowired
+    private  HttpSession session;
 /*
 
     @GetMapping("/auth")
@@ -84,32 +86,21 @@ public class ActivitiController {
 
     @GetMapping("/index")
     public String index(@RequestParam(required = false) String code, @RequestParam(required = false) String tab,
-                        HttpSession session, Model model) throws WxErrorException {
-        if(!StringUtils.isBlank(code)) {//code非空则是微信网页登录跳转过来的
-            String[] res =  wxService.getOauth2Service().getUserInfo(code);
-            final String userId = res[0];
-            WxCpUser wxCpUser = wxService.getUserService().getById(userId);
-            //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
-            final String userName = wxCpUser.getEnglishName();
-//        Integer[] departIds = wxCpUser.getDepartIds();
-//        List<WxCpDepart> departs = wxService.getDepartmentService().list(departIds[0]);
-//        System.out.println(JsonUtils.toJson(departs));
-            session.setAttribute("userId", userId);
-            session.setAttribute("userName", userName);
-        }
-
-//        if(session.getAttribute("userId") != null) {
-//            wxService.getOauth2Service().buildAuthorizationUrl();
-//        }
+                        HttpSession session, Model model) {
+        this.initSession(code, session);
         model.addAttribute("tab", tab);
         return "index";
     }
 
 
-
     @GetMapping("/toApply")
     public String toApply(Model model) throws WxErrorException {
-
+        String userId = (String) session.getAttribute(OaConstants.USER_ID);
+        WxCpUser wxCpUser = wxService.getUserService().getById(userId);
+        Integer[] departIds = wxCpUser.getDepartIds();
+        List<WxCpDepart> departs = wxService.getDepartmentService().list(departIds[0]);
+        model.addAttribute("applicantMobile", wxCpUser.getMobile());
+        model.addAttribute("applicantDepart", departs.get(0).getName());
         return "applyForm";
     }
 
@@ -279,16 +270,12 @@ public class ActivitiController {
 
     private void initSession(String code, HttpSession session)  {
         if(!StringUtils.isBlank(code)) {//code非空则是微信网页登录跳转过来的
-            System.out.println("initSession=====");
             try {
                 String[] res = wxService.getOauth2Service().getUserInfo(code);
                 final String userId = res[0];
                 WxCpUser wxCpUser = wxService.getUserService().getById(userId);
                 //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
                 final String userName = wxCpUser.getEnglishName();
-//        Integer[] departIds = wxCpUser.getDepartIds();
-//        List<WxCpDepart> departs = wxService.getDepartmentService().list(departIds[0]);
-//        System.out.println(JsonUtils.toJson(departs));
                 session.setAttribute("userId", userId);
                 session.setAttribute("userName", userName);
             } catch (WxErrorException e) {

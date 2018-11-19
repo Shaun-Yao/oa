@@ -12,6 +12,17 @@
       <input type="text" class="form-control" readonly name="applicant" id="applicant" value="${applicant}" />
   </div>
 
+
+  <div class="form-group">
+      <label class="col-sm-2 control-label">申请人部门</label>
+      <input type="text" class="form-control" readonly value="${applicantDepart}" />
+  </div>
+
+  <div class="form-group">
+      <label class="col-sm-2 control-label">申请人手机号码</label>
+      <input type="text" class="form-control" readonly value="${applicantMobile}" />
+  </div>
+
   <div class="form-group">
       <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
       <input type="text" class="form-control" readonly name="deviceName" id="deviceName" value="${deviceName}" />

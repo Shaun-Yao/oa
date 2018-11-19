@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,14 +111,17 @@ public class RepairService {
         Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         String taskId = task.getId();
         Map<String, String> formData = new HashMap();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         formData.put("id", String.valueOf(repair.getId()));
         formData.put("taskId", taskId);
         formData.put("applicantId", repair.getApplicantId());
         formData.put("applicant", repair.getApplicant());
+        formData.put("applicantMobile", repair.getApplicantMobile());
+        formData.put("applicantDepart", repair.getApplicantDepart());
         formData.put("deviceName", repair.getDeviceName());
         formData.put("deviceType", String.valueOf(repair.getDeviceType()));
         formData.put("description", repair.getDescription());
-        formData.put("createdTime", repair.getCreatedTime().toString());
+        formData.put("createdTime", repair.getCreatedTime().format(formatter));
         formService.saveFormData(taskId, formData);
 
         this.sendMsg(handler, repair, taskId);

@@ -16,10 +16,10 @@
     </div>
     <div class="panel-body">
         <form role="form" id="repairForm" th:action="@{/apply}" method="post">
-
-
             <input type="hidden" name="applicantId" id="applicantId" th:value="${session.userId}"/>
             <input type="hidden" name="applicant" id="applicant" th:value="${session.userName}"/>
+            <input type="hidden" name="applicantMobile" id="applicantMobile" th:value="${applicantMobile}"/>
+            <input type="hidden" name="applicantDepart" id="applicantDepart" th:value="${applicantDepart}"/>
 
 <!--
            <input type="hidden" name="applicantId" id="applicantId" th:value="518974"/>

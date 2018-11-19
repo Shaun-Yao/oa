@@ -43,7 +43,7 @@ public class Repair implements Serializable {
      * 申请人id
      */
     @NotEmpty
-    @Column(name = "APPLICANT_ID", length = 20, nullable = false)
+    @Column(name = "APPLICANT_ID", length = 10, nullable = false)
     private String applicantId;
 
     /**
@@ -52,6 +52,20 @@ public class Repair implements Serializable {
     @NotEmpty
     @Column(name = "APPLICANT", length = 10, nullable = false)
     private String applicant;
+
+    /**
+     * 申请人手机号码
+     */
+    @NotEmpty
+    @Column(name = "APPLICANT_MOBILE", length = 11, nullable = false)
+    private String applicantMobile;
+
+    /**
+     * 申请人部门
+     */
+    @NotEmpty
+    @Column(name = "APPLICANT_DEPART", length = 20, nullable = false)
+    private String applicantDepart;
 
     /**
      * 创建时间
