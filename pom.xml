@@ -105,6 +105,12 @@
             <artifactId>bootbox</artifactId>
             <version>4.4.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.webjars.bowergithub.fengyuanchen</groupId>
+            <artifactId>viewerjs</artifactId>
+            <version>1.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>

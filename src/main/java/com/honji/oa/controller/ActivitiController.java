@@ -16,6 +16,7 @@ import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -87,7 +89,7 @@ public class ActivitiController {
     @GetMapping("/index")
     public String index(@RequestParam(required = false) String code, @RequestParam(required = false) String tab,
                         HttpSession session, Model model) {
-        this.initSession(code, session);
+        this.initSession(code);
         model.addAttribute("tab", tab);
         return "index";
     }
@@ -105,8 +107,8 @@ public class ActivitiController {
     }
 
     @PostMapping("/apply")
-    public String apply(@ModelAttribute Repair repair) {
-        repairService.apply(repair);
+    public String apply(@ModelAttribute Repair repair, @RequestParam("file") MultipartFile file) {
+        repairService.apply(repair, file);
         return "redirect:/index";
     }
 
@@ -120,7 +122,6 @@ public class ActivitiController {
     @PostMapping("/complete/{taskId}")
     public String complete(@PathVariable String taskId, @RequestParam String comment,
                            @RequestParam String handler) {
-
         repairService.complete(taskId, comment, handler);
         return "redirect:/index";
     }
@@ -213,10 +214,11 @@ public class ActivitiController {
         } else {
             processInstanceId = processInstance.getId();
         }
-
+        List<Attachment> attachments = taskService.getProcessInstanceAttachments(processInstanceId);
         List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
 
         model.addAttribute("repair", repair);
+        model.addAttribute("attachments", attachments);
         model.addAttribute("comments", comments);
         return "viewForm";
     }
@@ -226,21 +228,22 @@ public class ActivitiController {
     public String toAudit(@PathVariable Long id, @PathVariable String taskId, @RequestParam(required = false) String code,
                           HttpSession session, Model model) {
 
-        this.initSession(code, session);
+        this.initSession(code);
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if (task == null) {// 任务已经结束返回查看界面
             return "redirect:/toView/".concat(id.toString());
         }
 
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceId(task.getProcessInstanceId()).singleResult();
-
+        final String processInstanceId = processInstance.getId();
         //String id = processInstance.getBusinessKey().split("-")[1];
         //Repair repair = repairService.findById(id);
         //String businessKey = OaConstants.REPAIR_PROCESS_ID.concat("-").concat(id.toString());
         //ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(businessKey).singleResult();
         //Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         //final String taskId = task.getId();
-        List<Comment> comments = taskService.getProcessInstanceComments(processInstance.getId());
+        List<Comment> comments = taskService.getProcessInstanceComments(processInstanceId);
+        List<Attachment> attachments = taskService.getProcessInstanceAttachments(processInstanceId);
         Object renderedStartForm = formService.getRenderedTaskForm(taskId);
         List<WxCpUser> users = new ArrayList<>();
         try {
@@ -264,11 +267,12 @@ public class ActivitiController {
         //model.addAttribute("repair", repair);
         model.addAttribute("repairers", users);
         model.addAttribute("taskId", taskId);
+        model.addAttribute("attachments", attachments);
         model.addAttribute("comments", comments);
         return "auditForm";
     }
 
-    private void initSession(String code, HttpSession session)  {
+    private void initSession(String code)  {
         if(!StringUtils.isBlank(code)) {//code非空则是微信网页登录跳转过来的
             try {
                 String[] res = wxService.getOauth2Service().getUserInfo(code);

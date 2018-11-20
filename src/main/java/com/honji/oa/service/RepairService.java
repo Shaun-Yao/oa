@@ -12,7 +12,9 @@ import me.chanjar.weixin.cp.bean.WxCpUser;
 import me.chanjar.weixin.cp.config.WxCpConfigStorage;
 import org.activiti.engine.*;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Attachment;
 import org.activiti.engine.task.Task;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,8 +22,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,7 +87,7 @@ public class RepairService {
 
     //TODO 事务有问题
     @Transactional(rollbackFor = Exception.class)
-    public void apply(Repair repair) {
+    public void apply(Repair repair, MultipartFile file) {
         repairRepository.save(repair);
         final String id = repair.getId().toString();
 
@@ -108,8 +112,20 @@ public class RepairService {
             e.printStackTrace();
         }
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
-        Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
-        String taskId = task.getId();
+        final String processInstanceId = processInstance.getId();
+        Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
+        final String taskId = task.getId();
+        if (!file.isEmpty()) {
+            final String fileName = file.getOriginalFilename();
+            String attachmentType = FilenameUtils.getExtension(fileName);
+            try {
+                Attachment attachment = taskService.createAttachment(attachmentType, taskId, processInstanceId,
+                        fileName, "repair attachment", file.getInputStream());
+                log.info("物品维修附件{}上传成功", fileName);
+            } catch (IOException e) {
+                log.error("物品维修附件上传众所失败", e);
+            }
+        }
         Map<String, String> formData = new HashMap();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         formData.put("id", String.valueOf(repair.getId()));

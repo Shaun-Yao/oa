@@ -15,7 +15,7 @@
         <h3 class="panel-title">物品维修申请</h3>
     </div>
     <div class="panel-body">
-        <form role="form" id="repairForm" th:action="@{/apply}" method="post">
+        <form role="form" id="repairForm" th:action="@{/apply}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="applicantId" id="applicantId" th:value="${session.userId}"/>
             <input type="hidden" name="applicant" id="applicant" th:value="${session.userName}"/>
             <input type="hidden" name="applicantMobile" id="applicantMobile" th:value="${applicantMobile}"/>
@@ -25,28 +25,34 @@
            <input type="hidden" name="applicantId" id="applicantId" th:value="518974"/>
            <input type="hidden" name="applicant" id="applicant" th:value="yao"/>
 -->
-                       <div class="form-group">
-                           <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-                           <input type="text" class="form-control" name="deviceName" id="deviceName" required="required" />
-                       </div>
+           <div class="form-group">
+               <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
+               <input type="text" class="form-control" name="deviceName" id="deviceName" required="required" />
+           </div>
 
-                       <div class="form-group">
+           <div class="form-group">
 
-                           <div class="radio">
-                               <label>
-                                   <input type="radio" name="deviceType" id="optionsRadios1" value="0" checked>小件物品
-                               </label>
-                               <label>
-                                   <input type="radio" name="deviceType" id="optionsRadios2" value="1">大件物品
-                               </label>
-                           </div>
+               <div class="radio">
+                   <label>
+                       <input type="radio" name="deviceType" id="optionsRadios1" value="0" checked>小件物品
+                   </label>
+                   <label>
+                       <input type="radio" name="deviceType" id="optionsRadios2" value="1">大件物品
+                   </label>
+               </div>
 
-                       </div>
+           </div>
 
-                       <div class="form-group">
-                           <label for="description" class="col-sm-2 control-label">故障描述</label>
-                           <textarea class="form-control" name="description" id="description" rows="3" required="required"></textarea>
-                       </div>
+           <div class="form-group">
+               <label for="description" class="col-sm-2 control-label">故障描述</label>
+               <textarea class="form-control" name="description" id="description" rows="3" required="required"></textarea>
+           </div>
+
+            <div class="form-group">
+                <label for="file">上传图片</label>
+                <input type="file" name="file" id="file" accept="image/*" multiple="multiple">
+                <p class="help-block">这里是块级帮助文本的实例。</p>
+            </div>
 
                        <div class="col-md-4 text-center">
                            <button type="button" class="btn btn-primary btn-lg" id="submitBtn">提交</button>

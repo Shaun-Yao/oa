@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
+    <script src="/webjars/viewerjs/dist/viewer.min.js"></script>
+    <link rel="stylesheet" href="/webjars/viewerjs/dist/viewer.min.css" />
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
     <title>repair form</title>
 </head>
@@ -26,6 +29,11 @@
             <label for="description" class="col-sm-2 control-label">故障描述</label>
             <textarea class="form-control" readonly name="description" id="description" rows="3" th:text="${repair.description}"></textarea>
         </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">附件</label>
+            <a href="#" th:each="attachment,iter : ${attachments}" th:data-id="${attachment.id}"
+               class="imageLink" th:text="图片 + ${iter.index + 1}"></a>
+        </div>
         <div class="panel panel-default">
             <div class="panel-heading">备注内容</div>
             <table class="table table-large">
@@ -46,6 +54,20 @@
     function goBack() {
         window.location.href='/index?tab=mine';
     }
+
+    $('.imageLink').click(function () {
+        var image = new Image();
+        image.src = '/datas/attachment/'+ this.getAttribute('data-id');
+        var viewer = new Viewer(image, {
+            toolbar: false,
+            hidden: function () {
+                viewer.destroy();
+            },
+        });
+        // image.click();
+        viewer.show();
+    });
+
 </script>
 <style type="text/css">
 

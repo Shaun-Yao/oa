@@ -89,10 +89,12 @@
         }
 
         $('a[href="#mine"]').on('shown.bs.tab', function (e) {
+            console.log("222" + [[${session.userId}]]);
             $("#applyTable tbody").empty();
             $.ajax({
                 type: "GET",
-                url: "/datas/myApplications/" + [[${session.userId}]],
+                //url: "/datas/myApplications/" + [[${session.userId}]],
+                url: "/datas/myApplications/518974",
                 //data: "name=garfield&age=18",
                 dataType: "json",
                 success: function(data){
