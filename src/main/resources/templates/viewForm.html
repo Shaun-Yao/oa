@@ -38,8 +38,9 @@
             <div class="panel-heading">备注内容</div>
             <table class="table table-large">
 
-                <tr th:each="comment : ${comments}">
-                    <td th:text="${comment.userId} + ':' +${comment.fullMessage}"></td>
+                <tr th:each="comment : ${comments}" th:object="${comment}"
+                    th:if="${comment.fullMessage} != null">
+                    <td th:text="*{userId} + ':' + *{fullMessage}"></td>
                     <td th:text="${#dates.format(comment.time,'yyyy-MM-dd HH:mm')}"></td>
                 </tr>
 
@@ -60,6 +61,7 @@
         image.src = '/datas/attachment/'+ this.getAttribute('data-id');
         var viewer = new Viewer(image, {
             toolbar: false,
+            navbar: false,
             hidden: function () {
                 viewer.destroy();
             },

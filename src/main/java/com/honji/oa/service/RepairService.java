@@ -97,6 +97,7 @@ public class RepairService {
         Map<String, Object> variables = new HashMap();
         final int deviceType = repair.getDeviceType();
         variables.put("deviceType", deviceType);
+        System.out.println(deviceType);
         String handler = null;
         try {
             if(deviceType == 0) {
@@ -111,6 +112,7 @@ public class RepairService {
         } catch (WxErrorException e) {
             e.printStackTrace();
         }
+
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(OaConstants.REPAIR_PROCESS_ID, businessKey, variables);
         final String processInstanceId = processInstance.getId();
         Task task = taskService.createTaskQuery().processInstanceId(processInstanceId).singleResult();
@@ -228,7 +230,8 @@ public class RepairService {
                             .processInstanceId(processInstanceId).singleResult();
                     String id = processInstance.getBusinessKey().split("-")[1];
                     Repair repair = repairRepository.getOne(Long.valueOf(id));
-                    variables.put(applicant, repair.getApplicantId());
+                    handler = repair.getApplicantId();
+                    variables.put(applicant, handler);
                     break;
                 default:
                     throw new IllegalArgumentException();

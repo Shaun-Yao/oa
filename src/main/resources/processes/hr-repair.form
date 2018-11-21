@@ -33,6 +33,10 @@
       <textarea class="form-control" readonly name="description" id="description" rows="3" >${description}</textarea>
   </div>
 
+ <div class="form-group" id="attachment">
+        <label class="col-sm-2 control-label">附件</label>
+ </div>
+
 <div class="form-group" id="commentGroup">
       <label for="comment" class="col-sm-2 control-label">备注意见</label>
       <textarea class="form-control" name="comment" id="comment" rows="3" required="required"></textarea>

@@ -7,6 +7,8 @@
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="/webjars/bootbox/4.4.0/bootbox.js"></script>
+    <script src="/webjars/viewerjs/dist/viewer.min.js"></script>
+    <link rel="stylesheet" href="/webjars/viewerjs/dist/viewer.min.css" />
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
 
 </head>
@@ -49,22 +51,40 @@
             $('#comments').insertBefore($('#commentGroup'));
             $('#comments').removeClass("invisible");
             for (i = 0; i < comments.length; i++) {
-                //var time  = new Date(comments[i].time).toLocaleString('zh-Hans-CN');
-                var time  = new Date(comments[i].time).toLocaleString();
-                var comment = "<tr><td>" + comments[i].userId + ": " + comments[i].fullMessage
-                    + "</td><td>" + time + "</td></tr>";
-                $('#comments > table').append(comment);
+                if (comments[i].fullMessage != null) {
+                    var time  = new Date(comments[i].time).toLocaleString();
+                    var comment = "<tr><td>" + comments[i].userId + ": " + comments[i].fullMessage
+                        + "</td><td>" + time + "</td></tr>";
+                    $('#comments > table').append(comment);
+                }
             }
         }
+
+        /*[# th:each="attachment,iter : ${attachments}"]*/
+            $("#attachment").append("<a href='#' class='imageLink' data-id='"
+                + [[${attachment.id}]] + "'>图片" + [[${iter.index + 1}]] + "</a>");
+        /*[/]*/
 
         /*[# th:each="repairer : ${repairers}"]*/
             $("#transferId").append("<option value='" + [[${repairer.userId}]]
                 + "'>" + [[${repairer.englishName}]] + "</option>");
         /*[/]*/
 
-        //$("#transferId").empty();
-
-
+        //由于imageLink是dom加载完成后动态初始化的，所以点击事件必须放在$(function(){})里面才能绑定到事件
+        $('.imageLink').click(function () {
+            console.log(23423);
+            var image = new Image();
+            image.src = '/datas/attachment/'+ this.getAttribute('data-id');
+            var viewer = new Viewer(image, {
+                toolbar: false,
+                navbar: false,
+                hidden: function () {
+                    viewer.destroy();
+                },
+            });
+            // image.click();
+            viewer.show();
+        });
     });
 
     $('#submitBtn').click(function() {
@@ -104,13 +124,8 @@
                 }
             });
         }
-        //event.preventDefault();
-        //return false;
-        //$('#confirmModal').modal('show');
 
     });
-
-
 
     $('#finish').click(function () {
 

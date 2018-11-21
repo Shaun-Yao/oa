@@ -111,6 +111,12 @@
             <artifactId>viewerjs</artifactId>
             <version>1.2.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.webjars.bowergithub.wenzhixin</groupId>
+            <artifactId>bootstrap-table</artifactId>
+            <version>1.12.1</version>
+        </dependency>
     </dependencies>
 
     <build>

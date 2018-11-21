@@ -25,8 +25,8 @@ public class DataController {
     @GetMapping(value = "/myApplications/{userId}")
     public Page<Repair> myApplications(@PathVariable String userId, @RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "5") int size) {
-        System.out.println(userId);
         Page<Repair> repairPage = repairService.findMyApplications(userId, page, size);
+
         return repairPage;
 
     }
