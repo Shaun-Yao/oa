@@ -1,5 +1,6 @@
 package com.honji.oa.controller;
 
+import com.honji.oa.domain.PageVo;
 import com.honji.oa.domain.Repair;
 import com.honji.oa.service.RepairService;
 import org.activiti.engine.TaskService;
@@ -22,20 +23,19 @@ public class DataController {
     @Autowired
     private TaskService taskService;
 
-    @GetMapping(value = "/myApplications/{userId}")
-    public Page<Repair> myApplications(@PathVariable String userId, @RequestParam(defaultValue = "0") int page,
-                                       @RequestParam(defaultValue = "5") int size) {
-        Page<Repair> repairPage = repairService.findMyApplications(userId, page, size);
-
-        return repairPage;
+    @GetMapping(value = "/myApplications")
+    public PageVo myApplications(@RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int size) {
+        Page<Repair> repairPage = repairService.findMyApplications(page, size);
+        return new PageVo(repairPage.getTotalElements(), repairPage.getContent());
 
     }
 
-    @GetMapping(value = "/todoList/{userId}")
-    public Page<Repair> todoList(@PathVariable String userId, @RequestParam(defaultValue = "0") int page,
-                           @RequestParam(defaultValue = "5") int size) {
-        Page<Repair> repairPage = repairService.findTodoList(userId, page, size);
-        return repairPage;
+    @GetMapping(value = "/todoList")
+    public PageVo todoList(@RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = "10") int size) {
+        Page<Repair> repairPage = repairService.findTodoList(page, size);
+        return new PageVo(repairPage.getTotalElements(), repairPage.getContent());
     }
 
     @GetMapping(value = "/attachment/{id}", produces = MediaType.IMAGE_JPEG_VALUE)

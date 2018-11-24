@@ -16,13 +16,13 @@
     </div>
     <div class="panel-body">
         <div class="form-group">
-        <label for="createdTime" class="col-sm-2 control-label">申请时间</label>
-        <input type="text" class="form-control" readonly name="createdTime" id="createdTime" th:value="${repair.createdTime}" />
-    </div>
+            <label class="col-sm-2 control-label">申请时间</label>
+            <span th:text="${repair.createdTime}"></span>
+        </div>
 
         <div class="form-group">
-            <label for="deviceName" class="col-sm-2 control-label">故障设备名称</label>
-            <input type="text" class="form-control" readonly name="deviceName" id="deviceName" th:value="${repair.deviceName}" />
+            <label class="col-sm-2 control-label">故障设备名称</label>
+            <span th:text="${repair.deviceName}"></span>
         </div>
 
         <div class="form-group">
@@ -35,7 +35,7 @@
                class="imageLink" th:text="图片 + ${iter.index + 1}"></a>
         </div>
         <div class="panel panel-default">
-            <div class="panel-heading">备注内容</div>
+            <div class="panel-heading">审批流程</div>
             <table class="table table-large">
 
                 <tr th:each="comment : ${comments}" th:object="${comment}"

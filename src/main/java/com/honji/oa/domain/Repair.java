@@ -1,5 +1,6 @@
 package com.honji.oa.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.honji.oa.enums.ProcessStatus;
 import lombok.Data;
 import org.activiti.engine.history.HistoricProcessInstance;
@@ -71,7 +72,7 @@ public class Repair implements Serializable {
      * 创建时间
      */
     @CreationTimestamp
-    //@Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm")
     @Column(name = "CREATED_TIME", columnDefinition = "timestamp", nullable = false, updatable = false)
     private LocalDateTime createdTime;
 

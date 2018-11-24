@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -79,7 +80,10 @@ public class RepairService {
 
     @Autowired
     private HttpServletRequest request;
-    
+
+    @Autowired
+    private HttpSession session;
+
     public Repair findById(Long id) {
         return repairRepository.findById(id).get();
     }
@@ -147,11 +151,12 @@ public class RepairService {
 
 
     
-    public Page<Repair> findTodoList(String assignee, int page, int size) {
-
+    public Page<Repair> findTodoList(int page, int size) {
+        String userId = String.valueOf(session.getAttribute(OaConstants.USER_ID));
+        System.out.println(userId);
         final int offset = page * size;
-        long total = taskService.createTaskQuery().taskAssignee(assignee).count();
-        List<Task> tasks = taskService.createTaskQuery().taskAssignee(assignee)
+        long total = taskService.createTaskQuery().taskAssignee(userId).count();
+        List<Task> tasks = taskService.createTaskQuery().taskAssignee(userId)
                 .orderByTaskCreateTime().desc().listPage(offset, size);
         List<Repair> repairs = new ArrayList<>();
 
@@ -174,7 +179,7 @@ public class RepairService {
     }
 
     
-    public Page<Repair> findMyApplications(String userId, int page, int size) {
+    public Page<Repair> findMyApplications(int page, int size) {
        /* final int offset = page * size;
         long total = historyService.createHistoricProcessInstanceQuery().startedBy(userId).count();
 //        List<HistoricProcessInstance> processInstances = historyService.createHistoricProcessInstanceQuery()
@@ -194,6 +199,7 @@ public class RepairService {
 
         Pageable pageable = PageRequest.of(page, size);
         Page<Repair> repairPage = new PageImpl<>(repairs, pageable, total);*/
+        String userId = String.valueOf(session.getAttribute(OaConstants.USER_ID));
         Pageable pageable = PageRequest.of(page, size);
         Page<Repair> repairPage = repairRepository.findByApplicantIdOrderByCreatedTimeDesc(userId, pageable);
         return repairPage;

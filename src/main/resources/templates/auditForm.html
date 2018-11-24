@@ -28,7 +28,11 @@
         <div class="panel panel-default invisible" id="comments">
             <div class="panel-heading">审批流程</div>
             <table class="table table-large">
-
+                <tr th:each="comment : ${comments}" th:object="${comment}"
+                    th:if="${comment.fullMessage} != null">
+                    <td th:text="*{userId} + ':' + *{fullMessage}"></td>
+                    <td th:text="${#dates.format(comment.time,'yyyy-MM-dd HH:mm')}"></td>
+                </tr>
             </table>
         </div>
     </div>
@@ -50,14 +54,6 @@
         if (comments.length > 0) {
             $('#comments').insertBefore($('#commentGroup'));
             $('#comments').removeClass("invisible");
-            for (i = 0; i < comments.length; i++) {
-                if (comments[i].fullMessage != null) {
-                    var time  = new Date(comments[i].time).toLocaleString();
-                    var comment = "<tr><td>" + comments[i].userId + ": " + comments[i].fullMessage
-                        + "</td><td>" + time + "</td></tr>";
-                    $('#comments > table').append(comment);
-                }
-            }
         }
 
         /*[# th:each="attachment,iter : ${attachments}"]*/

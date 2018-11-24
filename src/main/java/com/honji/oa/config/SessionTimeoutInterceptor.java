@@ -23,15 +23,15 @@ public class SessionTimeoutInterceptor extends HandlerInterceptorAdapter {
 
         HttpSession session = request.getSession();
         String code = request.getParameter("code");
-        if (StringUtils.isNotEmpty(code)) {//有code参数表示微信网页登录授权回调，直接放行
-            System.out.println("has code===");
-            return true;
-        }
+        System.out.println("getRequestURI===" + request.getRequestURI());
+//        if (StringUtils.isNotEmpty(code)) {//有code参数表示微信网页登录授权回调，直接放行
+//            System.out.println("has code===");
+//            return true;
+//        }
 
         Object userName = session.getAttribute("userName");
-        if (userName == null) {//session过期需要重新使用微信网页登录授权
+        if (StringUtils.isEmpty(code) && userName == null) {//session过期需要重新使用微信网页登录授权
             System.out.println("session deprecated===");
-            System.out.println(request.getRequestURI());
             String uri = request.getRequestURI();
             String rootPath = request.getRequestURL().substring(0,
                     request.getRequestURL().length() - uri.length());
@@ -41,7 +41,7 @@ public class SessionTimeoutInterceptor extends HandlerInterceptorAdapter {
             }
 
             System.out.println("indexPath" + indexPath);
-            String authUrl = wxService.getOauth2Service().buildAuthorizationUrl(indexPath, "STATE", "snsapi_userinfo");
+            String authUrl = wxService.getOauth2Service().buildAuthorizationUrl(indexPath, "STATE", "snsapi_base");
             response.sendRedirect(authUrl);
             return false;
         }

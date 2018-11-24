@@ -7,7 +7,9 @@
     <title>index</title>
     <script src="/webjars/jquery/3.1.1/jquery.min.js"></script>
     <script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="/webjars/bootstrap-table/dist/bootstrap-table.min.js"></script>
     <link rel="stylesheet" href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/webjars/bootstrap-table/dist/bootstrap-table.min.css" />
 
 </head>
 <body>
@@ -37,18 +39,8 @@
     </div>
     <div class="tab-pane fade" id="mine">
         <div class="table-responsive">
-            <table class="table" id="applyTable">
+            <table class="display" id="applyTable">
 
-                <thead>
-                <tr>
-                    <th>提交时间</th>
-                    <th>故障设备名称</th>
-                    <th>状态</th>
-                </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
             </table>
         </div>
     </div>
@@ -77,6 +69,7 @@
 <script th:inline="javascript">
     $(function(){
 
+
         //var tab = [[${tab}]];
         switch ([[${tab}]]) {
             case "mine":
@@ -89,9 +82,8 @@
         }
 
         $('a[href="#mine"]').on('shown.bs.tab', function (e) {
-            console.log("222" + [[${session.userId}]]);
-            $("#applyTable tbody").empty();
-            $.ajax({
+            //$("#applyTable tbody").empty();
+           /* $.ajax({
                 type: "GET",
                 //url: "/datas/myApplications/" + [[${session.userId}]],
                 url: "/datas/myApplications/518974",
@@ -108,14 +100,44 @@
                         $("#applyTable tbody:last").append(rowTem);
                     }
                 }
+            });*/
+
+            $('#applyTable').bootstrapTable({
+                url: "/datas/myApplications",
+                queryParams: function (e) {
+                    var param = {
+                        size: e.limit,
+                        page: (e.offset / e.limit),//不需要+1
+                    };
+                    return param;
+                },
+                onClickRow: function (e) {
+                    window.location.href='/toView/' + e.id;
+                },
+                pagination: true,
+                sidePagination: 'server',
+                paginationLoop: true,
+                paginationPreText: '上一页',
+                paginationNextText: '下一页',
+                columns: [{
+                    field: 'createdTime',
+                    title: '申请时间'
+                },{
+                    field: 'deviceName',
+                    title: '故障设备名称'
+                },{
+                    field: 'status',
+                    title: '状态'
+                }]
             });
         });
 
         $('a[href="#todo"]').on('shown.bs.tab', function (e) {
-            $("#todoTable tbody").empty();
+            /*$("#todoTable tbody").empty();
             $.ajax({
                 type: "GET",
-                url: "/datas/todoList/" + [[${session.userId}]],
+                //url: "/datas/todoList/" + [[${session.userId}]],
+                url: "/datas/todoList/518974",
                 dataType: "json",
                 success: function(data){
                     var content = data.content;
@@ -128,7 +150,37 @@
                         $("#todoTable tbody:last").append(rowTem);
                     }
                 }
+            });*/
+
+            $('#todoTable').bootstrapTable({
+                url: "/datas/todoList",
+                queryParams: function (e) {
+                    var param = {
+                        size: e.limit,
+                        page: (e.offset / e.limit),//不需要+1
+                    };
+                    return param;
+                },
+                onClickRow: function (e) {
+                    window.location.href='/toAudit/' + e.id + '/' + e.taskId;
+                },
+                pagination: true,
+                sidePagination: 'server',
+                paginationLoop: true,
+                paginationPreText: '上一页',
+                paginationNextText: '下一页',
+                columns: [{
+                    field: 'createdTime',
+                    title: '申请时间'
+                },{
+                    field: 'deviceName',
+                    title: '故障设备名称'
+                },{
+                    field: 'applicant',
+                    title: '申请人'
+                }]
             });
+
         });
 
         /*$("#myApplications").click(function () {

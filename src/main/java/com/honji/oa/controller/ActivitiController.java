@@ -21,7 +21,6 @@ import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -192,15 +191,6 @@ public class ActivitiController {
         return "repairForm";
     }
 
-    @RequestMapping(value = "/todoList/{userId}", method = {RequestMethod.GET, RequestMethod.POST})
-    //@GetMapping("/todoList")
-    public String todoList(@PathVariable String userId, @RequestParam(defaultValue = "0") Integer offset,
-                           @RequestParam(defaultValue = "5") Integer limit, Model model) {
-        Page<Repair> repairPage = repairService.findTodoList(userId, offset, limit);
-        model.addAttribute("repairPage", repairPage);
-        return "todoList";
-    }
-
 
     @GetMapping("/toView/{id}")
     public String toView(@PathVariable("id") Long id, Model model) {
@@ -273,7 +263,7 @@ public class ActivitiController {
     }
 
     private void initSession(String code)  {
-        if(!StringUtils.isBlank(code)) {//code非空则是微信网页登录跳转过来的
+        if(StringUtils.isNotBlank(code)) {//code非空则是微信网页登录跳转过来的
             try {
                 String[] res = wxService.getOauth2Service().getUserInfo(code);
                 final String userId = res[0];
