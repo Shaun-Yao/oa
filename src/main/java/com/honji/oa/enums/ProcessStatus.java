@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.io.Serializable;
 
 public enum ProcessStatus implements Serializable {
-    UNDER_AUDIT("审核中"), FINISHED("已完成");
+    UNDER_AUDIT("审核中"), FINISHED("已完成"), ENDED("已终止");
 
     @Setter
     @Getter

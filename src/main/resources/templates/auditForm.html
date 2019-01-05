@@ -120,13 +120,11 @@
                 }
             });
         }
-
     });
 
     $('#finish').click(function () {
-
         if($('#repairForm')[0].reportValidity()) {
-            bootbox.confirm("确认提交？", function(result){
+            bootbox.confirm("确认完成？", function(result){
                 if(result) {
                     $.ajax({
                         type: "POST",
@@ -145,7 +143,25 @@
                 }
             });
         }
+    });
 
+    $('#end').click(function () {
+        if($('#repairForm')[0].reportValidity()) {
+            bootbox.confirm("确定要终止流程？", function(result){
+                if(result) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/end/" + $('#id').val() + "/" + $('#taskId').val(),
+                        data: {
+                            "comment": $('#comment').val()
+                        },
+                        success: function(data){
+                            window.location.href='/index?tab=todo';
+                        }
+                    });
+                }
+            });
+        }
     });
 
 </script>

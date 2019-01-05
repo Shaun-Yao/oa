@@ -1,22 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/testm1541227747391" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1541227747391" name="" targetNamespace="http://www.activiti.org/testm1541227747391" typeLanguage="http://www.w3.org/2001/XMLSchema">
   <process id="repair_process" isClosed="false" isExecutable="true" name="物品维修" processType="None">
-    <startEvent id="repair_start_event" name="StartEvent" activiti:initiator="applicant"/>
+    <startEvent activiti:initiator="applicant" id="repair_start_event" name="StartEvent"/>
     <exclusiveGateway gatewayDirection="Unspecified" id="type_gateway" name="ExclusiveGateway"/>
     <sequenceFlow id="_4" sourceRef="repair_start_event" targetRef="type_gateway"/>
-    <userTask activiti:exclusive="true" id="manager_task" name="行政经理审批" activiti:assignee="${hr_manager}" activiti:formKey="hr-repair.form"/>
-    <userTask activiti:exclusive="true" id="repairer_task" name="电工负责人处理" activiti:assignee="${repairer}" activiti:formKey="repairer.form"/>
+    <userTask activiti:assignee="${hr_manager}" activiti:exclusive="true" activiti:formKey="hr-repair.form" id="manager_task" name="行政经理审批"/>
+    <userTask activiti:assignee="${repairer}" activiti:exclusive="true" activiti:formKey="repairer.form" id="repairer_task" name="电工负责人处理"/>
     <sequenceFlow id="_7" name="小件物品" sourceRef="type_gateway" targetRef="repairer_task">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${deviceType == 0}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="_8" name="大件物品" sourceRef="type_gateway" targetRef="manager_task">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${deviceType == 1}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="_5" sourceRef="manager_task" targetRef="repairer_task"/>
-    <userTask activiti:exclusive="true" id="applicant_task" name="申请人确认评分" activiti:assignee="${applicant}" activiti:formKey="applicant-repair.form"/>
+    <userTask activiti:assignee="${applicant}" activiti:exclusive="true" activiti:formKey="applicant-repair.form" id="applicant_task" name="申请人确认评分"/>
     <sequenceFlow id="_9" sourceRef="repairer_task" targetRef="applicant_task"/>
     <endEvent id="repair_end_event" name="EndEvent"/>
     <sequenceFlow id="_11" sourceRef="applicant_task" targetRef="repair_end_event"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_2" name="ExclusiveGateway"/>
+    <sequenceFlow id="_3" sourceRef="manager_task" targetRef="_2"/>
+    <sequenceFlow id="_5" name="通过" sourceRef="_2" targetRef="repairer_task">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approve == 0}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_6" name="直接终止" sourceRef="_2" targetRef="repair_end_event">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approve == 1}]]></conditionExpression>
+    </sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram documentation="background=#3C3F41;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
     <bpmndi:BPMNPlane bpmnElement="repair_process">
@@ -51,49 +58,69 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="repair_end_event" id="Shape-repair_end_event">
-        <dc:Bounds height="32.0" width="32.0" x="580.0" y="285.0"/>
+        <dc:Bounds height="32.0" width="32.0" x="590.0" y="225.0"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="_4" id="BPMNEdge__4" sourceElement="_2" targetElement="_3">
+      <bpmndi:BPMNShape bpmnElement="_2" id="Shape-_2" isMarkerVisible="false">
+        <dc:Bounds height="32.0" width="32.0" x="300.0" y="145.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_3" id="BPMNEdge__3" sourceElement="manager_task" targetElement="_2">
+        <di:waypoint x="255.0" y="162.5"/>
+        <di:waypoint x="300.0" y="161.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_4" id="BPMNEdge__4" sourceElement="repair_start_event" targetElement="type_gateway">
         <di:waypoint x="27.0" y="306.0"/>
         <di:waypoint x="100.0" y="306.0"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_5" id="BPMNEdge__5" sourceElement="manager_task" targetElement="repairer_task">
-        <di:waypoint x="255.0" y="162.5"/>
-        <di:waypoint x="275.0" y="302.5"/>
+      <bpmndi:BPMNEdge bpmnElement="_5" id="BPMNEdge__5" sourceElement="_2" targetElement="repairer_task">
+        <di:waypoint x="316.0" y="177.0"/>
+        <di:waypoint x="316.0" y="275.0"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_7" id="BPMNEdge__7" sourceElement="_3" targetElement="repairer_task">
+      <bpmndi:BPMNEdge bpmnElement="_6" id="BPMNEdge__6" sourceElement="_2" targetElement="repair_end_event">
+        <di:waypoint x="332.0" y="161.0"/>
+        <di:waypoint x="590.0" y="241.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_7" id="BPMNEdge__7" sourceElement="type_gateway" targetElement="repairer_task">
         <di:waypoint x="132.0" y="306.0"/>
         <di:waypoint x="275.0" y="302.5"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_8" id="BPMNEdge__8" sourceElement="_3" targetElement="manager_task">
+      <bpmndi:BPMNEdge bpmnElement="_8" id="BPMNEdge__8" sourceElement="type_gateway" targetElement="manager_task">
         <di:waypoint x="132.0" y="306.0"/>
         <di:waypoint x="170.0" y="162.5"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_9" id="BPMNEdge__9" sourceElement="repairer_task" targetElement="_6">
+      <bpmndi:BPMNEdge bpmnElement="_9" id="BPMNEdge__9" sourceElement="repairer_task" targetElement="applicant_task">
         <di:waypoint x="360.0" y="302.5"/>
         <di:waypoint x="415.0" y="302.5"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_11" id="BPMNEdge__11" sourceElement="_6" targetElement="_10">
+      <bpmndi:BPMNEdge bpmnElement="_11" id="BPMNEdge__11" sourceElement="applicant_task" targetElement="repair_end_event">
         <di:waypoint x="500.0" y="302.5"/>
-        <di:waypoint x="580.0" y="301.0"/>
+        <di:waypoint x="590.0" y="241.0"/>
         <bpmndi:BPMNLabel>
           <dc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
         </bpmndi:BPMNLabel>

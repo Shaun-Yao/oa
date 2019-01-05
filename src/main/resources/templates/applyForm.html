@@ -52,17 +52,17 @@
             <div class="form-group">
                 <label for="file">上传图片</label>
                 <input type="file" name="file" id="file" accept="image/*" multiple="multiple">
-                <p class="help-block">这里是块级帮助文本的实例。</p>
+                <p class="help-block">图片大小不超过3M。</p>
             </div>
 
-                       <div class="col-md-4 text-center">
-                           <button type="button" class="btn btn-primary btn-lg" id="submitBtn">提交</button>
-                           <button type="button" onclick="goBack()" class="btn btn-info btn-lg">返回</button>
-                       </div>
-                   </form>
-               </div>
-
+           <div class="col-md-4 text-center">
+               <button type="button" class="btn btn-primary btn-lg" id="submitBtn">提交</button>
+               <button type="button" onclick="goBack()" class="btn btn-info btn-lg">返回</button>
            </div>
+       </form>
+   </div>
+
+</div>
     </body>
 <script>
    function goBack() {
@@ -76,6 +76,7 @@
                //event.preventDefault();
                bootbox.confirm("确认提交维修申请？", function(result){
                    if(result) {
+                       $(".panel-body").modal('show');
                        $('#repairForm').submit();
                    }
                });

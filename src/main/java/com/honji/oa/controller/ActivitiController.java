@@ -126,7 +126,7 @@ public class ActivitiController {
     }
 
     /**
-     * 结束流程
+     * 完成流程
      * @param taskId
      * @param comment
      * @return
@@ -139,6 +139,12 @@ public class ActivitiController {
         identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute("userName")));
         repairService.finish(taskId, comment, repair);
         //return "redirect:/index";
+    }
+
+    @ResponseBody
+    @PostMapping("/end/{id}/{taskId}")
+    public void end(@PathVariable long id, @PathVariable String taskId, @RequestParam String comment) {
+        repairService.end(id, taskId, comment);
     }
 
     @ResponseBody
@@ -267,6 +273,7 @@ public class ActivitiController {
             try {
                 String[] res = wxService.getOauth2Service().getUserInfo(code);
                 final String userId = res[0];
+                System.out.println("userId=====" + userId);
                 WxCpUser wxCpUser = wxService.getUserService().getById(userId);
                 //由于公司现有OA对接企业微信把微信的name用来存放id,把真正的名字存到了EnglishName字段，所以这里取EnglishName
                 final String userName = wxCpUser.getEnglishName();

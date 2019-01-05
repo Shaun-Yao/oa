@@ -106,11 +106,13 @@ public class RepairService {
         try {
             if(deviceType == 0) {
                 List<WxCpUser> repairers = wxService.getTagService().listUsersByTagId("1");
-                handler = repairers.get(2).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                handler = repairers.get(0).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                System.out.println("repairer==" + handler);
                 variables.put("repairer", handler);
             } else if(deviceType == 1) {
                 List<WxCpUser> managers = wxService.getTagService().listUsersByTagId("2");
                 handler = managers.get(0).getUserId();//微信按userid排序，无法手动排序，所以只能取第一个
+                System.out.println("hr_manager==" + handler);
                 variables.put("hr_manager", handler);
             }
         } catch (WxErrorException e) {
@@ -213,11 +215,8 @@ public class RepairService {
         final String repairer = "repairer";
         final String applicant = "applicant";
         String handler = null;
-        //添加备注前需要先设置当前用户名作为备注的userId
-        identityService.setAuthenticatedUserId(String.valueOf(request.getSession().getAttribute("userName")));
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
-
 
         try {
             switch (handlerRole) {
@@ -246,7 +245,8 @@ public class RepairService {
             e.printStackTrace();
         }
 
-
+        //添加备注前需要先设置当前userName作为备注的userId
+        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute(OaConstants.USER_NAME)));
         taskService.addComment(taskId, processInstanceId, comment);
         taskService.complete(taskId, variables);
 
@@ -269,8 +269,8 @@ public class RepairService {
     public void transfer(String taskId, String comment, String repairer) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         String processInstanceId = task.getProcessInstanceId();
-        identityService.setAuthenticatedUserId(String.valueOf(
-                request.getSession().getAttribute("userName")));
+        //添加备注前需要先设置当前userName作为备注的userId
+        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute(OaConstants.USER_NAME)));
         taskService.setAssignee(taskId, repairer);
         taskService.addComment(taskId, processInstanceId, comment);
 
@@ -295,6 +295,23 @@ public class RepairService {
         taskService.complete(taskId);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void end(long id, String taskId, String comment) {
+        Repair dbRepair = repairRepository.getOne(id);
+        dbRepair.setStatus(ProcessStatus.ENDED);//设置为终止状态
+        repairRepository.save(dbRepair);
+
+        Map<String, Object> variables = new HashMap();
+        variables.put("approve", 1);
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        String processInstanceId = task.getProcessInstanceId();
+        //添加备注前需要先设置当前userName作为备注的userId
+        identityService.setAuthenticatedUserId(String.valueOf(session.getAttribute(OaConstants.USER_NAME)));
+        taskService.addComment(taskId, processInstanceId, comment);
+        taskService.complete(taskId, variables);
+        this.sendViewMsg(dbRepair);
+    }
+
     private void sendMsg(String handler, Repair repair, String taskId) {
         String rootPath = request.getRequestURL().substring(0,
                 request.getRequestURL().length() - request.getRequestURI().length());
@@ -309,7 +326,25 @@ public class RepairService {
         try {
             wxService.messageSend(message);
         } catch (WxErrorException e) {
-            log.error("发送消息通知失败", e);
+            log.error("发送待办消息通知失败", e);
+            e.printStackTrace();
+        }
+    }
+
+    private void sendViewMsg(Repair repair) {
+        String rootPath = request.getRequestURL().substring(0,
+                request.getRequestURL().length() - request.getRequestURI().length());
+        String viewPath = rootPath.concat("/toView/").concat(repair.getId().toString());
+        WxCpConfigStorage configStorage = wxService.getWxCpConfigStorage();
+        WxCpMessage message = WxCpMessage.TEXTCARD().agentId(configStorage.getAgentId())
+                .toUser(repair.getApplicantId()).title("您的流程申请被终止了")
+                .description(repair.getDeviceName().concat(": ").concat(repair.getDescription()))
+                .url(viewPath)
+                .build();
+        try {
+            wxService.messageSend(message);
+        } catch (WxErrorException e) {
+            log.error("发送查看消息通知失败", e);
             e.printStackTrace();
         }
     }

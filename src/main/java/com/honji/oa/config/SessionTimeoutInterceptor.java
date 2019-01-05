@@ -24,6 +24,7 @@ public class SessionTimeoutInterceptor extends HandlerInterceptorAdapter {
         HttpSession session = request.getSession();
         String code = request.getParameter("code");
         System.out.println("getRequestURI===" + request.getRequestURI());
+        System.out.println("code===" + code);
 //        if (StringUtils.isNotEmpty(code)) {//有code参数表示微信网页登录授权回调，直接放行
 //            System.out.println("has code===");
 //            return true;
